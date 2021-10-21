@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>tapanga</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
+    <PackageReference Include="System.CommandLine.Rendering" Version="0.3.0-alpha.21216.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tapanga.Core\Tapanga.Core.csproj" />
+    <ProjectReference Include="..\Tapanga.Generators\Tapanga.Core.Generators.csproj" />
+  </ItemGroup>
+
+</Project>
