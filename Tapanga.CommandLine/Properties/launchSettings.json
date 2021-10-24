@@ -2,7 +2,7 @@
   "profiles": {
     "Tapanga": {
       "commandName": "Project",
-      "commandLineArgs": "gen test go"
+      "commandLineArgs": "gen test info"
     },
     "gen test run": {
       "commandName": "Project",
@@ -15,6 +15,10 @@
     "gen ssh go": {
       "commandName": "Project",
       "commandLineArgs": " gen ssh go"
+    },
+    "plugin paths": {
+      "commandName": "Project",
+      "commandLineArgs": "-pp C:\\Users\\catosfate\\source\\repos\\Tapanga\\Tapanga.Core.Generators\\bin\\Debug\\net6.0 gen"
     }
   }
 }

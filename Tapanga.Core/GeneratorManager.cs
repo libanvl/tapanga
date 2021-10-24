@@ -3,46 +3,90 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
+using ProfileGenerators = IEnumerable<IProfileGenerator>;
+
 public class GeneratorManager
 {
-    public IEnumerable<IProfileGenerator> GetProfileGenerators()
+    private static Opt<ProfileGenerators> _cachedGenerators = Opt.None<ProfileGenerators>();
+    private readonly Action<string> _infoLog;
+    private Opt<IEnumerable<DirectoryInfo>> _pluginPaths;
+
+    public GeneratorManager(Action<string> infoLog, Opt<IEnumerable<DirectoryInfo>> pluginPaths)
     {
-        string? pluginsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location);
-        string absolutePath = Path.Combine(pluginsPath!, "Tapanga.Core.Generators.dll");
-        var core = LoadPlugin(absolutePath);
-        return CreateGenerators(core);
+        _infoLog = infoLog;
+        _pluginPaths = pluginPaths;
     }
 
-    static Assembly LoadPlugin(string absolutePath)
+    public ProfileGenerators GetProfileGenerators()
     {
-        Console.WriteLine($"Loading profile generators from: {absolutePath}");
+        if (_cachedGenerators is Opt<ProfileGenerators>.None)
+        {
+            IEnumerable<string> pluginsPaths = _pluginPaths switch
+            {
+                Opt<IEnumerable<DirectoryInfo>>.Some some => some.Value.Select(di => di.FullName),
+                _ => Enumerable.Empty<string>()
+            };
+
+            var dllPaths = pluginsPaths.SelectMany(pp => Directory.EnumerateFiles(pp, "*.dll", new EnumerationOptions
+            {
+                MatchCasing = MatchCasing.CaseInsensitive,
+            }));
+
+            _cachedGenerators = Opt.Some(dllPaths.SelectMany(dll => CreateGenerators(LoadPlugin(dll))));
+        }
+
+        if (_cachedGenerators is Opt<ProfileGenerators>.Some someGenerators)
+        {
+            return someGenerators.Value;
+        }
+
+        return Enumerable.Empty<IProfileGenerator>();
+    }
+
+    private static Assembly LoadPlugin(string absolutePath)
+    {
         PluginLoadContext loadContext = new(absolutePath);
         return loadContext.LoadFromAssemblyPath(absolutePath);
     }
 
-    static IEnumerable<IProfileGenerator> CreateGenerators(Assembly assembly)
+    private ProfileGenerators CreateGenerators(Assembly assembly)
     {
+        if (assembly.GetCustomAttribute<PluginAssemblyAttribute>() is null)
+        {
+            yield break;
+        }
+
         int count = 0;
 
-        foreach (Type type in assembly.GetTypes())
+        foreach (Type type in assembly.GetExportedTypes())
         {
+            if (typeof(IDelegateProfileGenerator).IsAssignableFrom(type))
+            {
+                var result = Activator.CreateInstance(type) as IDelegateProfileGenerator;
+                if (result is IDelegateProfileGenerator generator)
+                {
+                    count++;
+                    yield return new DelegateGeneratorAdapter(generator);
+                    continue;
+                }
+            }
+
             if (typeof(IProfileGenerator).IsAssignableFrom(type))
             {
                 var result = Activator.CreateInstance(type) as IProfileGenerator;
                 if (result is IProfileGenerator generator)
                 {
                     count++;
-                    yield return generator; 
+                    yield return generator;
                 }
             }
         }
 
-        if (count == 0)
+        if (count < 1)
         {
-            string availableTypes = string.Join(",", assembly.GetTypes().Select(t => t.FullName));
-            throw new ApplicationException(
-                $"Can't find any type which implements IProfileGenerator in {assembly} from {assembly.Location}.\n" +
-                $"Available types: {availableTypes}");
+            throw new InvalidOperationException($"No plugins found in Tapanga plugin assembly: {assembly.GetName().Name}");
         }
+
+        _infoLog($"Loaded {count} generators from: {assembly.Location}");
     }
 }
