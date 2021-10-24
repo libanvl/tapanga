@@ -32,19 +32,16 @@ public class TestGenerator : DelegateGenerator<TestGenerator.Arguments>
                 string.Join("\n", typeof(TestGenerator).Assembly.GetManifestResourceNames()),
         });
 
-    protected override Func<Arguments, int> GetGeneratorCore(IProfileCollection profiles)
+    protected override int GeneratorCore(IProfileCollection profiles, Arguments args)
     {
-        return (Arguments p) =>
-        {
-            profiles.Add(new Profile(
-                Name: p.ProfileName,
-                CommandLine: $"echo {p.Greeting.FormatParameter()}",
-                StartingDirectory: p.StartingDirectory.AsOpt(),
-                TabTitle: p.ProfileTitle.AsOpt(),
-                Icon: Opt.None<Icon>()
-                ));
+        profiles.Add(new Profile(
+            Name: args.ProfileName,
+            CommandLine: $"echo {args.Greeting.FormatParameter()}",
+            StartingDirectory: args.StartingDirectory.AsOpt(),
+            TabTitle: args.ProfileTitle.AsOpt(),
+            Icon: Opt.None<Icon>()
+            ));
 
-            return 0;
-        };
+        return 0;
     }
 }

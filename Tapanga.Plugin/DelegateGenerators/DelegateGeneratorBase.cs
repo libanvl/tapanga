@@ -6,12 +6,12 @@ public abstract class DelegateGeneratorBase<T, U> : IDelegateProfileGenerator wh
 
     public abstract bool IsAsyncDelegate { get; }
 
-    protected abstract Func<T, U> GetGeneratorCore(IProfileCollection profiles);
+    protected abstract U GeneratorCore(IProfileCollection profiles, T args);
 
     public virtual Type ParameterType => typeof(T);
 
     public virtual Delegate GetGeneratorDelegate(IProfileCollection profiles)
     {
-        return this.GetGeneratorCore(profiles);
+        return (T arguments) => this.GeneratorCore(profiles, arguments);
     }
 }

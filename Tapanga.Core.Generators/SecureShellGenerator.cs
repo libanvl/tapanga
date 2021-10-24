@@ -72,29 +72,26 @@ public class SecureShellGenerator : DelegateGenerator<SecureShellGenerator.Argum
         "SSH Connection Profiles",
         Opt.None<GeneratorDescription>());
 
-    protected override Func<Arguments, int> GetGeneratorCore(IProfileCollection profiles)
+    protected override int GeneratorCore(IProfileCollection profiles, Arguments args)
     {
-        return (Arguments args) =>
-        {
-            const string sshResourceName = "Tapanga.Core.Resources.ssh.png";
+        const string sshResourceName = "Tapanga.Core.Generators.Resources.ssh.png";
 
-            var assembly = typeof(SecureShellGenerator).Assembly;
-            var resource = assembly.GetManifestResourceStream(sshResourceName);
+        var assembly = typeof(SecureShellGenerator).Assembly;
+        var resource = assembly.GetManifestResourceStream(sshResourceName);
 
-            Opt<Icon> icon = resource is null
-                ? Opt.None<Icon>()
-                : Opt.Some<Icon>(new Icon(sshResourceName, resource));
+        Opt<Icon> icon = resource is null
+            ? Opt.None<Icon>()
+            : Opt.Some<Icon>(new Icon(sshResourceName, resource));
 
-            Profile profile = new(
-                args.ProfileName,
-                $"{args.SshExe}{args.Verbose.FormatParameter("-v")}{args.Opts.FormatParameter()}{args.Destination.ToString().FormatParameter()}{args.Command.FormatParameter()}",
-                args.StartingDirectory.AsOpt(),
-                args.ProfileTitle.AsOpt(),
-                icon);
+        Profile profile = new(
+            args.ProfileName,
+            $"{args.SshExe}{args.Verbose.FormatParameter("-v")}{args.Opts.FormatParameter()}{args.Destination.ToString().FormatParameter()}{args.Command.FormatParameter()}",
+            args.StartingDirectory,
+            args.ProfileTitle,
+            icon);
 
-            profiles.Add(profile);
+        profiles.Add(profile);
 
-            return 0;
-        };
+        return 0;
     }
 }

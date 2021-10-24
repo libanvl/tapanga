@@ -45,6 +45,18 @@
                 : string.IsNullOrEmpty(value) ? Tapanga.None.String : Some(value);
         }
 
+        public static Opt<IEnumerable<T>> WrapOpt<T>(this IEnumerable<T>? value, bool emptyIsNone = false)
+        {
+            if (value is not null)
+            {
+                return emptyIsNone
+                    ? value.Any() ? Some(value) : None<IEnumerable<T>>()
+                    : Some(value);
+            }
+
+            return None<IEnumerable<T>>();
+        }
+
         public static Opt<T>.Some Some<T>(T value) => new(value);
 
         public static Opt<T>.None None<T>() => Opt<T>.NoneInstance;
@@ -53,5 +65,11 @@
     public static class None
     {
         public static Opt<string>.None String => Opt<string>.NoneInstance;
+    }
+
+    public record GenericEnum<T, U>(T EnumValue, U ObjectValue) where T : Enum
+    {
+        public static implicit operator T(GenericEnum<T, U> arg) => arg.EnumValue;
+        public static implicit operator U(GenericEnum<T, U> arg) => arg.ObjectValue;
     }
 }

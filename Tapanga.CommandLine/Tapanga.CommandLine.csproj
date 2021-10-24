@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tapanga.Core.Generators\Tapanga.Core.Generators.csproj" />
     <ProjectReference Include="..\Tapanga.Core\Tapanga.Core.csproj" />
-    <ProjectReference Include="..\Tapanga.Generators\Tapanga.Core.Generators.csproj" />
   </ItemGroup>
 
 </Project>

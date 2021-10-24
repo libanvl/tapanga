@@ -1,4 +1,6 @@
-﻿namespace Tapanga.Plugin
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Tapanga.Plugin
 {
     public abstract class OptionalArgument
     {
@@ -39,5 +41,21 @@
         public static implicit operator Opt<T>(OptionalArgument<T> arg) => arg.AsOpt();
 
         public static explicit operator T?(OptionalArgument<T> arg) => arg._value.SomeOrDefault(default!);
+    }
+
+    public static class OptionalArgumentExtensions
+    {
+        public static bool IsTypeOptionalArgument(this Type valueType, [NotNullWhen(true)] out Type? boundType)
+        {
+            if (valueType.IsGenericType
+                && valueType.IsAssignableTo(typeof(OptionalArgument<>).MakeGenericType(valueType.GenericTypeArguments)))
+            {
+                boundType = valueType.GenericTypeArguments[0];
+                return true;
+            }
+
+            boundType = null;
+            return false;
+        }
     }
 }
