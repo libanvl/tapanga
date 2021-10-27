@@ -5,10 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Tapanga</RootNamespace>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CrypticWizard.RandomWordGenerator" Version="0.9.3" />
-  </ItemGroup>
 
 </Project>

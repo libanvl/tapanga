@@ -4,19 +4,23 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-internal class DelegateGeneratorAdapter : IProvideUserArguments, IProfileGenerator
+internal class DelegateGeneratorAdapter : ProfileGeneratorAdapter, IDelegateProfileGenerator
 {
-    private static IReadOnlyList<UserArgument>? _cachedArguments = null;
+    private IReadOnlyList<UserArgument>? _cachedArguments = null;
 
     private readonly IDelegateProfileGenerator _inner;
 
-    public DelegateGeneratorAdapter(IDelegateProfileGenerator delegateGenerator) => _inner = delegateGenerator;
+    public DelegateGeneratorAdapter(IDelegateProfileGenerator delegateGenerator)
+        : base(delegateGenerator)
+    {
+        _inner = delegateGenerator;
+    }
 
-    public GeneratorInfo GeneratorInfo => _inner.GeneratorInfo;
+    public bool IsAsyncDelegate => _inner.IsAsyncDelegate;
 
-    public Delegate GetGeneratorDelegate(IProfileCollection profiles) => _inner.GetGeneratorDelegate(profiles);
+    public Type ParameterType => _inner.ParameterType;
 
-    public IReadOnlyList<UserArgument> GetUserArguments()
+    public override IReadOnlyList<UserArgument> GetUserArguments()
     {
         if (_cachedArguments is null)
         {
@@ -35,22 +39,13 @@ internal class DelegateGeneratorAdapter : IProvideUserArguments, IProfileGenerat
 
         foreach (var p in argProps)
         {
-            var attr = p.GetCustomAttribute<UserArgumentAttribute>(inherit: true);
-            if (attr is null)
+            var uaAttr = p.GetCustomAttribute<UserArgumentAttribute>(inherit: true);
+            if (uaAttr is null)
             {
                 continue;
             }
 
-            bool isRequired = true;
             Type boundType = p.PropertyType;
-            if (boundType.IsGenericType)
-            {
-                if (boundType.IsAssignableTo(typeof(OptionalArgument<>).MakeGenericType(boundType.GetGenericArguments())))
-                {
-                    isRequired = false;
-                    boundType = typeof(OptionalArgument<>).MakeGenericType(boundType.GetGenericArguments());
-                }
-            }
 
             var defaultOptType = typeof(Opt<>).MakeGenericType(boundType);
             if (typeof(UserArgument<>).GetGenericConstructor(boundType, new[]
@@ -61,7 +56,7 @@ internal class DelegateGeneratorAdapter : IProvideUserArguments, IProfileGenerat
                     defaultOptType, /* DefaultValue */
                     typeof(bool), /* IsRequired */
                     typeof(int) /* Sort */
-                }) is Opt<ConstructorInfo>.Some someCtor)
+            }) is Opt<ConstructorInfo>.Some someCtor)
             {
                 object? defaultOptValue = defaultOptType.GetProperty("NoneInstance", BindingFlags.Static | BindingFlags.Public)?.GetValue(null);
                 var valfac = p.GetCustomAttribute<DefaultValueFactoryAttribute>();
@@ -84,12 +79,12 @@ internal class DelegateGeneratorAdapter : IProvideUserArguments, IProfileGenerat
 
                 var userArgument = (UserArgument)someCtor.Value.Invoke(new object?[]
                 {
-                        p.Name.ToLowerInvariant(),
-                        attr.ShortName.WrapOpt(whitespaceIsNone: true),
-                        attr.Description,
-                        defaultOptValue,
-                        isRequired,
-                        attr.Sort
+                    p.Name.ToLowerInvariant(),
+                    uaAttr.ShortName.WrapOpt(whitespaceIsNone: true),
+                    uaAttr.Description,
+                    defaultOptValue,
+                    uaAttr.IsRequired,
+                    uaAttr.Sort
                 });
 
                 userArguments.Add(userArgument);
@@ -110,23 +105,12 @@ internal class DelegateGeneratorAdapter : IProvideUserArguments, IProfileGenerat
             return null;
         }
 
-        if (p.IsGenericType)
-        {
-            Type optionalType = typeof(OptionalArgument<>).MakeGenericType(p.GenericTypeArguments);
-
-            if (p.IsAssignableTo(optionalType))
-            {
-                var optionalMaker = optionalType.GetMethod("Make", BindingFlags.Public | BindingFlags.Static);
-                defaultValue = optionalMaker?.Invoke(null, new[] { defaultValue });
-            }
-        }
-
         if (typeof(Opt<>.Some).GetGenericWrapperConstructor(p) is Opt<ConstructorInfo>.Some someCtor)
         {
             return someCtor.Value.Invoke(new[]
             {
-                    defaultValue
-                });
+                defaultValue
+            });
         }
 
         return null;

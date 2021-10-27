@@ -38,7 +38,7 @@
     {
         public static Opt<T> WrapOpt<T>(this T? value) => value is null ? None<T>() : Some(value);
 
-        public static Opt<string> WrapOpt(this string value, bool whitespaceIsNone = false)
+        public static Opt<string> WrapOpt(this string? value, bool whitespaceIsNone = false)
         {
             return whitespaceIsNone
                 ? string.IsNullOrWhiteSpace(value) ? Tapanga.None.String : Some(value)
@@ -65,6 +65,17 @@
     public static class None
     {
         public static Opt<string>.None String => Opt<string>.NoneInstance;
+
+        public static Opt<int>.None Int => Opt<int>.NoneInstance;
+
+        public static Opt<bool>.None Bool => Opt<bool>.NoneInstance;
+
+        public static Opt<double>.None Double => Opt<double>.NoneInstance;
+    }
+
+    public static class Some
+    {
+        public static Opt<string>.Some String(string v) => new(v);
     }
 
     public record GenericEnum<T, U>(T EnumValue, U ObjectValue) where T : Enum

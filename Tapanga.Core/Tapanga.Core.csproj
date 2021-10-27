@@ -4,7 +4,20 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\extensionReadme.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\extensionReadme.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Validation" Version="17.0.34" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Tapanga.Plugin\Tapanga.Plugin.csproj" />

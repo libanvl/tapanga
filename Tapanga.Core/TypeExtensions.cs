@@ -1,8 +1,10 @@
-﻿using System.Reflection;
+﻿using Microsoft;
+using System.Reflection;
+using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-public static class TypeExtensions
+internal static class TypeExtensions
 {
     public static Opt<ConstructorInfo> GetGenericWrapperConstructor(this Type wrapperType, Type boundType)
     {
@@ -23,5 +25,27 @@ public static class TypeExtensions
         }
 
         return boundGenericType.GetConstructor(constructorTypes).WrapOpt();
+    }
+
+    public static GeneratorId GetGeneratorId(this IProfileGenerator generator)
+    {
+        Type generatorType = generator.GetType();
+        if (generatorType.GetCustomAttribute<ProfileGeneratorAttribute>(inherit: true) is ProfileGeneratorAttribute attr)
+        {
+            var assemblyName = generatorType.Assembly.GetName();
+            var assemblySimple = assemblyName.Name;
+            var assemblyVersion = assemblyName.Version;
+
+            Assumes.NotNull(assemblySimple);
+            Assumes.NotNull(assemblyVersion);
+
+            return new GeneratorId(
+                key: attr.Key,
+                version: attr.Version,
+                assemblyName: assemblySimple,
+                assemblyVersion: assemblyVersion);
+        }
+
+        throw new ArgumentException($"Profile generators must be decorated with {nameof(ProfileGeneratorAttribute)}", nameof(generator));
     }
 }

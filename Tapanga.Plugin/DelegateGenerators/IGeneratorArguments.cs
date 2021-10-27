@@ -2,9 +2,9 @@
 
 public interface IGeneratorArguments
 {
-    string ProfileName { get; }
+    string? ProfileName { get; set; }
 
-    OptionalArgument<string> ProfileTitle { get; }
+    string? ProfileTitle { get; set; }
 
-    OptionalArgument<DirectoryInfo> StartingDirectory { get; }
+    DirectoryInfo? StartingDirectory { get; set; }
 }
