@@ -5,14 +5,10 @@ namespace Tapanga.Plugin
     {
         int Count { get; }
 
-        bool IsReadOnly { get; }
+        void Add(ProfileData item);
 
-        void Add(Profile item);
+        bool Contains(ProfileData item);
 
-        bool Contains(Profile item);
-
-        IEnumerator<Profile> GetEnumerator();
-
-        bool Remove(Profile item);
+        IEnumerator<ProfileData> GetEnumerator();
     }
 }

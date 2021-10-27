@@ -2,19 +2,19 @@
   "profiles": {
     "Tapanga": {
       "commandName": "Project",
-      "commandLineArgs": "gen test info"
+      "commandLineArgs": "gen core.test info"
     },
     "gen test run": {
       "commandName": "Project",
-      "commandLineArgs": "gen test run -g \"Hey Babes!\" -pn \"My Profile Name\" -pd \"C:\\Users\\\""
+      "commandLineArgs": "gen core.test run -g \"Hey Babes!\" -pn \"My Profile Name\" -pd \"C:\\Users\\\""
     },
     "gen ssh run": {
       "commandName": "Project",
-      "commandLineArgs": " gen ssh run --destination n7ewx@silo.ewx --profilename \"ssh silo\" --profiletitle \"Hello Silo!\""
+      "commandLineArgs": " gen core.ssh run --destination n7ewx@silo.ewx --profilename \"ssh silo\" --profiletitle \"Hello Silo!\""
     },
     "gen ssh go": {
       "commandName": "Project",
-      "commandLineArgs": " gen ssh go"
+      "commandLineArgs": " gen core.ssh go"
     },
     "plugin paths": {
       "commandName": "Project",

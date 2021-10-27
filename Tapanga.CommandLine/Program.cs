@@ -1,20 +1,19 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Reflection;
 using Tapanga.Core;
 
 namespace Tapanga.CommandLine;
 
-public class Program
+internal class Program
 {
     internal const string RootDescription = "TaPaN-Ga: Terminal Profile N-Generator";
 
     private static readonly Option<IEnumerable<DirectoryInfo>> PluginPathOption =
         new Option<IEnumerable<DirectoryInfo>>(
             "--plugin-path",
-            description: "Directory to search for plugin assemblies. Multiple options are allowed.",
+            description: "Directory to search for plugin assemblies. Accepts mutiple options.",
             getDefaultValue: () => new[] { new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location)!) })
         {
             AllowMultipleArgumentsPerToken = true,
@@ -28,7 +27,7 @@ public class Program
         try
         {
             var console = new ColorConsole();
-            var profiles = new ProfileCollection();
+            var profiles = new Dictionary<GeneratorId, ProfileCollection>();
 
             ParseResult parseResult = new Parser(PluginPathOption).Parse(args);
             IEnumerable<DirectoryInfo>? pluginPaths = parseResult.ValueForOption(PluginPathOption)?
@@ -47,10 +46,15 @@ public class Program
                 return ret;
             }
 
-            foreach (var p in profiles)
+            foreach (var collection in profiles.Values)
             {
-                Console.WriteLine($"PROFILE: {p}");
+                foreach (var p in collection)
+                {
+                    Console.WriteLine($"PROFILE: {p}");
+                }
             }
+
+            new ProfileManager().WriteProfiles(profiles);
 
             return 0;
         }
@@ -60,32 +64,28 @@ public class Program
         }
     }
 
-    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, ProfileCollection profiles)
+    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, IDictionary<GeneratorId, ProfileCollection> profilesMap)
     {
         var rootCommand = new RootCommand(RootDescription)
         {
             PluginPathOption,
         };
 
-        IEnumerable<Plugin.IProfileGenerator> profileGenerators = gm.GetProfileGenerators();
-        if (profileGenerators.Any())
+        var generatorCommand = new Command("generator")
         {
-            var generatorCommand = new Command("generator")
-            {
-                Description = "Interact with the available generators",
-            };
-            foreach (var pg in profileGenerators)
-            {
-                var innerCommands = new ProfileGeneratorCommandAdapter(profiles, pg);
-                generatorCommand.Add(innerCommands.GetCommand());
-            }
+            Description = "Interact with the available generators",
+        };
 
-            rootCommand.Add(generatorCommand.WithAlias("gen", "g"));
-        }
-        else
+        foreach (var pg in gm.GetProfileGenerators())
         {
-            rootCommand.Handler = CommandHandler.Create(() => Console.WriteLine("No profile generators found!"));
+            ProfileCollection profiles = new();
+            profilesMap.Add(pg.GeneratorId, profiles);
+            var innerCommands = new ProfileGeneratorCommandAdapter(profiles, pg);
+            generatorCommand.Add(innerCommands.GetCommand());
         }
+
+        rootCommand.Add(generatorCommand.WithAlias("gen", "g"));
+
 
         return new CommandLineBuilder(rootCommand);
     }

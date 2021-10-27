@@ -1,15 +1,16 @@
 ﻿using System.Reflection;
+using System.Runtime.Loader;
 using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-using ProfileGenerators = IEnumerable<IProfileGenerator>;
+using ProfileGenerators = IEnumerable<IProfileGeneratorAdapter>;
 
 public class GeneratorManager
 {
-    private static Opt<ProfileGenerators> _cachedGenerators = Opt.None<ProfileGenerators>();
+    private static Opt<ProfileGenerators> cachedGenerators = Opt.None<ProfileGenerators>();
     private readonly Action<string> _infoLog;
-    private Opt<IEnumerable<DirectoryInfo>> _pluginPaths;
+    private readonly Opt<IEnumerable<DirectoryInfo>> _pluginPaths;
 
     public GeneratorManager(Action<string> infoLog, Opt<IEnumerable<DirectoryInfo>> pluginPaths)
     {
@@ -19,7 +20,7 @@ public class GeneratorManager
 
     public ProfileGenerators GetProfileGenerators()
     {
-        if (_cachedGenerators is Opt<ProfileGenerators>.None)
+        if (cachedGenerators is Opt<ProfileGenerators>.None)
         {
             IEnumerable<string> pluginsPaths = _pluginPaths switch
             {
@@ -32,15 +33,15 @@ public class GeneratorManager
                 MatchCasing = MatchCasing.CaseInsensitive,
             }));
 
-            _cachedGenerators = Opt.Some(dllPaths.SelectMany(dll => CreateGenerators(LoadPlugin(dll))));
+            cachedGenerators = Opt.Some(dllPaths.SelectMany(dll => CreateGenerators(LoadPlugin(dll))));
         }
 
-        if (_cachedGenerators is Opt<ProfileGenerators>.Some someGenerators)
+        if (cachedGenerators is Opt<ProfileGenerators>.Some someGenerators)
         {
             return someGenerators.Value;
         }
 
-        return Enumerable.Empty<IProfileGenerator>();
+        return Enumerable.Empty<ProfileGeneratorAdapter>();
     }
 
     private static Assembly LoadPlugin(string absolutePath)
@@ -77,7 +78,7 @@ public class GeneratorManager
                 if (result is IProfileGenerator generator)
                 {
                     count++;
-                    yield return generator;
+                    yield return new ProfileGeneratorAdapter(generator);
                 }
             }
         }
@@ -88,5 +89,48 @@ public class GeneratorManager
         }
 
         _infoLog($"Loaded {count} generators from: {assembly.Location}");
+    }
+
+    private class PluginLoadContext : AssemblyLoadContext
+    {
+        private readonly AssemblyDependencyResolver _resolver;
+
+        public PluginLoadContext(string pluginPath) => _resolver = new AssemblyDependencyResolver(pluginPath);
+
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            // ensure the plugin base assembly is only loaded by the entry assembly
+            if (assemblyName.FullName == typeof(IProfileGenerator).Assembly.FullName)
+            {
+                return null;
+            }
+
+            try
+            {
+                string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+                if (assemblyPath is not null)
+                {
+                    return LoadFromAssemblyPath(assemblyPath);
+
+                }
+            }
+            catch (BadImageFormatException)
+            {
+                return null;
+            }
+
+            return null;
+        }
+
+        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+        {
+            string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+            if (libraryPath is not null)
+            {
+                return LoadUnmanagedDllFromPath(libraryPath);
+            }
+
+            return IntPtr.Zero;
+        }
     }
 }

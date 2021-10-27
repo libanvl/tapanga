@@ -9,15 +9,6 @@ internal static class UserArgumentExtensions
     {
         switch (arg)
         {
-            case UserArgument<OptionalArgument<string>> optstringarg:
-                return optstringarg.AsOption();
-            case UserArgument<OptionalArgument<bool>> optboolarg:
-                return optboolarg.AsOption();
-            case UserArgument<OptionalArgument<FileInfo>> optfilearg:
-                return optfilearg.AsOption();
-            case UserArgument<OptionalArgument<DirectoryInfo>> optdirarg:
-                return optdirarg.AsOption();
-
             case UserArgument<Uri> uriarg:
                 return uriarg.AsOption();
             case UserArgument<string> stringarg:
@@ -57,12 +48,12 @@ internal static class UserArgumentExtensions
             _ => throw new NotImplementedException()
         };
 
-        if (typeof(T) == typeof(FileInfo) || typeof(T) == typeof(OptionalArgument<FileInfo>))
+        if (typeof(T) == typeof(FileInfo))
         {
             option = option.LegalFileNamesOnly();
         }
 
-        if (typeof(T) == typeof(DirectoryInfo) || typeof(T) == typeof(OptionalArgument<DirectoryInfo>))
+        if (typeof(T) == typeof(DirectoryInfo))
         {
             option = option.LegalFilePathsOnly();
         }

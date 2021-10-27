@@ -12,5 +12,7 @@ public sealed class UserArgumentAttribute : Attribute
 
     public string ShortName { get; set; } = string.Empty;
 
+    public bool IsRequired { get; set; }
+
     public int Sort { get; set; } = 0;
 }

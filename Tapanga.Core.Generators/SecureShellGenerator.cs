@@ -1,47 +1,32 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Reflection;
 using Tapanga.Plugin;
 
 namespace Tapanga.Core.Generators;
 
+[ProfileGenerator("core.ssh", "0.1")]
+[Description("Generates SSH connection profiles.")]
 public class SecureShellGenerator : DelegateGenerator<SecureShellGenerator.Arguments>
 {
     public class Arguments : CommonArguments
     {
-        public Arguments(
-            string profileName,
-            OptionalArgument<string> profileTitle,
-            OptionalArgument<DirectoryInfo> startingDirectory,
-            FileInfo sshExe,
-            OptionalArgument<bool> verbose,
-            OptionalArgument<string> opts,
-            Uri destination,
-            OptionalArgument<string> command)
-            : base(profileName, profileTitle, startingDirectory)
-        {
-            SshExe = sshExe;
-            Verbose = verbose;
-            Opts = opts;
-            Destination = destination;
-            Command = command;
-        }
-
-        [UserArgument("Path to the SSH client", ShortName = "s")]
+        [UserArgument("Path to the SSH client", ShortName = "s", IsRequired = true)]
         [DefaultValueFactory(nameof(GetSshExeDefault))]
-        public FileInfo SshExe { get; }
+        public FileInfo? SshExe { get; set; }
 
         [UserArgument("Enable verbose output for SSH client", ShortName = "v")]
         [DefaultValue(false)]
-        public OptionalArgument<bool> Verbose { get; }
+        public bool Verbose { get; set; }
 
         [UserArgument("Additional options for the SSH client", ShortName = "o")]
-        public OptionalArgument<string> Opts { get; }
+        public string? Opts { get; set; }
 
-        [UserArgument("SSH destination", ShortName = "d", Sort = -1)]
-        public Uri Destination { get; }
+        [UserArgument("SSH destination", ShortName = "d", IsRequired = true, Sort = -1)]
+        public Uri? Destination { get; set; }
 
         [UserArgument("Command to execute on the SSH destination", ShortName = "c")]
-        public OptionalArgument<string> Command { get; }
+        public string? Command { get; set; }
 
         public static FileInfo GetSshExeDefault()
         {
@@ -67,27 +52,19 @@ public class SecureShellGenerator : DelegateGenerator<SecureShellGenerator.Argum
         }
     }
 
-    public override GeneratorInfo GeneratorInfo { get; } = new GeneratorInfo(
-        "ssh",
-        "SSH Connection Profiles",
-        Opt.None<GeneratorDescription>());
+    public override GeneratorInfo GeneratorInfo => GeneratorInfo.Empty;
 
     protected override int GeneratorCore(IProfileCollection profiles, Arguments args)
     {
         const string sshResourceName = "Tapanga.Core.Generators.Resources.ssh.png";
 
-        var assembly = typeof(SecureShellGenerator).Assembly;
-        var resource = assembly.GetManifestResourceStream(sshResourceName);
+        Opt<Icon> icon = Assembly.GetExecutingAssembly().GetOptIcon(sshResourceName);
 
-        Opt<Icon> icon = resource is null
-            ? Opt.None<Icon>()
-            : Opt.Some<Icon>(new Icon(sshResourceName, resource));
-
-        Profile profile = new(
-            args.ProfileName,
-            $"{args.SshExe}{args.Verbose.FormatParameter("-v")}{args.Opts.FormatParameter()}{args.Destination.ToString().FormatParameter()}{args.Command.FormatParameter()}",
-            args.StartingDirectory,
-            args.ProfileTitle,
+        ProfileData profile = new(
+            NotNullOrThrow(args.ProfileName),
+            $"{args.SshExe}{args.Verbose.FormatParameter("-v")}{args.Opts.FormatParameter()}{NotNullOrThrow(args.Destination).ToString().FormatParameter()}{args.Command.FormatParameter()}",
+            args.StartingDirectory.WrapOpt(),
+            args.ProfileTitle.WrapOpt(whitespaceIsNone: true),
             icon);
 
         profiles.Add(profile);
