@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Tapanga.Plugin;
 
 namespace Tapanga.Core.Serialization;
 
@@ -20,7 +21,21 @@ internal class Profile
     [JsonPropertyName("icon")]
     public string? Icon { get; set; }
 
-    [JsonPropertyName("tapangeMetadata")]
+    [JsonPropertyName("tapangaMetadata")]
     public TapangaMetadata TapangaMetadata { get; set; } = TapangaMetadata.None;
+}
+
+internal static class ProfileExtensions
+{
+    public static ProfileData AsProfileData(this Profile profile)
+    {
+        return new ProfileData(
+            profile.Name!,
+            profile.Commandline!,
+            string.IsNullOrWhiteSpace(profile.StartingDirectory) ? Opt.None<DirectoryInfo>() : new DirectoryInfo(profile.StartingDirectory),
+            profile.TabTitle!,
+            string.IsNullOrWhiteSpace(profile.Icon) ? Opt.None<Icon>() : new PathIcon(Path.GetFileName(profile.Icon), profile.Icon)
+        );
+    }
 }
 

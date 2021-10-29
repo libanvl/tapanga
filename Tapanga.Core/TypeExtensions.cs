@@ -4,7 +4,7 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-internal static class TypeExtensions
+public static class TypeExtensions
 {
     public static Opt<ConstructorInfo> GetGenericWrapperConstructor(this Type wrapperType, Type boundType)
     {
@@ -27,6 +27,27 @@ internal static class TypeExtensions
         return boundGenericType.GetConstructor(constructorTypes).WrapOpt();
     }
 
+    public static bool IsAssignableToOpenGeneric(this Type derived, Type @base)
+    {
+        if (derived.IsGenericType)
+        {
+            var closedGeneric = @base.MakeGenericType(derived.GetGenericArguments());
+            return derived.IsAssignableTo(closedGeneric);
+        }
+
+        return false;
+    }
+
+    public static bool IsBoundType(this Type type, Type boundType)
+    {
+        if (type.IsAssignableToOpenGeneric(typeof(IEnumerable<>)))
+        {
+            return type.GenericTypeArguments[0] == boundType;
+        }
+
+        return type == boundType;
+    }
+
     public static GeneratorId GetGeneratorId(this IProfileGenerator generator)
     {
         Type generatorType = generator.GetType();
@@ -47,5 +68,11 @@ internal static class TypeExtensions
         }
 
         throw new ArgumentException($"Profile generators must be decorated with {nameof(ProfileGeneratorAttribute)}", nameof(generator));
+    }
+
+    internal static Guid GetProfileId(this ProfileData profileData)
+    {
+        Guid namespaceGuid = GuidUtilities.NameToGuid(GuidUtilities.WindowsTerminalGeneratedNamespaceGuid, "Tapanga");
+        return GuidUtilities.NameToGuid(namespaceGuid, profileData.Name);
     }
 }

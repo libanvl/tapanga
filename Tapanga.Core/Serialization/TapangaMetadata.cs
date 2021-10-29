@@ -14,6 +14,6 @@ namespace Tapanga.Core.Serialization
         public GeneratorId? GeneratorId { get; set; }
 
         [JsonPropertyName("profileId")]
-        public string? ProfileId { get; set; }
+        public Guid? ProfileId { get; set; }
     }
 }

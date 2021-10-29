@@ -17,7 +17,40 @@ public class ProfileManager
             "Fragments",
             "Tapanga");
 
-    public void WriteProfiles(IDictionary<GeneratorId, ProfileCollection> profilesMap)
+    public IDictionary<GeneratorId, ProfileDataCollection> LoadProfiles()
+    {
+        var root = new FragmentRoot();
+
+        string filepath = Path.Combine(fragmentsPath, profilesJsonFile);
+        if (File.Exists(filepath))
+        {
+            using (var fileStream = File.OpenRead(filepath))
+            {
+                root = JsonSerializer.Deserialize<FragmentRoot>(fileStream)!;
+                // better null handling
+                Assumes.NotNull(root);
+            }
+
+            // check tapanga versions are compatible
+        }
+
+        var result = new Dictionary<GeneratorId, ProfileDataCollection>();
+
+        foreach (var profile in root.Profiles)
+        {
+            if (!result.TryGetValue(profile.TapangaMetadata.GeneratorId!, out var dataCollection))
+            {
+                dataCollection = new ProfileDataCollection();
+                result[profile.TapangaMetadata.GeneratorId!] = dataCollection;
+            }
+
+            dataCollection.Add(profile.AsProfileData());
+        }
+
+        return result;
+    }
+
+    public void WriteProfiles(IDictionary<GeneratorId, ProfileDataCollection> profilesMap)
     {
         if (profilesMap.Count < 1)
         {
@@ -29,15 +62,17 @@ public class ProfileManager
         {
             foreach (var pro in profiles)
             {
+                var metadata = new TapangaMetadata
+                {
+                    ProfileId = pro.GetProfileId(),
+                    GeneratorId = generatorId
+                };
+
                 var fragmentProfile = new Profile
                 {
                     Commandline = pro.CommandLine,
                     Name = pro.Name,
-                    TapangaMetadata =
-                    {
-                        ProfileId = Utilities.GetShortRandomId(),
-                        GeneratorId = generatorId
-                    }
+                    TapangaMetadata = metadata,
                 };
 
                 if (pro.StartingDirectory is Opt<DirectoryInfo>.Some someDirectoryInfo)
@@ -66,18 +101,6 @@ public class ProfileManager
         var root = new FragmentRoot();
         string filepath = Path.Combine(profilePathInfo.FullName, profilesJsonFile);
 
-        if (File.Exists(filepath))
-        {
-            using (var fileStream = File.OpenRead(filepath))
-            {
-                root = JsonSerializer.Deserialize<FragmentRoot>(fileStream)!;
-                // better null handling
-                Assumes.NotNull(root);
-            }
-
-            // check tapanga versions are compatible
-        }
-
         root.TapangaVersion = new TapangaVersion(
             typeof(IProfileGenerator).Assembly.GetName().Version ?? new Version(0, 0),
             GetType().Assembly.GetName().Version ?? new Version(0, 0));
@@ -104,7 +127,7 @@ public class ProfileManager
             if (someIcon.Value is StreamIcon streamIcon)
             {
                 var iconsDirectory = Directory.CreateDirectory(
-                    Path.Combine(fragmentsPath, "Icons", generatorId.AssemblyName));
+                    Path.Combine(fragmentsPath, "Icons", $"{generatorId.AssemblyName}.{generatorId.AssemblyVersion}"));
 
                 string iconPath = Path.Combine(iconsDirectory.FullName, streamIcon.Name);
                 if (File.Exists(iconPath))

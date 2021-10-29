@@ -1,6 +1,6 @@
 ﻿namespace Tapanga.Plugin;
 
-public class CommonArguments : IGeneratorArguments
+public class CommonArguments
 {
     [UserArgument("Profile: name", ShortName = "pn", IsRequired = true, Sort = -302)]
     [DefaultValueFactory(nameof(GetDefaultProfileName))]

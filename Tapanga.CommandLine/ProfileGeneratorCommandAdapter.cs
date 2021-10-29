@@ -1,4 +1,5 @@
-﻿using System.CommandLine;
+﻿using System.Collections;
+using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
@@ -9,10 +10,10 @@ namespace Tapanga.CommandLine;
 
 internal class ProfileGeneratorCommandAdapter
 {
-    private readonly ProfileCollection _profiles;
+    private readonly ProfileDataCollection _profiles;
     private readonly IProfileGeneratorAdapter _inner;
 
-    public ProfileGeneratorCommandAdapter(ProfileCollection profiles, IProfileGeneratorAdapter profileGenerator)
+    public ProfileGeneratorCommandAdapter(ProfileDataCollection profiles, IProfileGeneratorAdapter profileGenerator)
     {
         _profiles = profiles;
         _inner = profileGenerator;
@@ -71,83 +72,88 @@ internal class ProfileGeneratorCommandAdapter
     {
         return new Command("go")
         {
-            Handler = CommandHandler.Create(Handler),
+            Handler = CommandHandler.Create(GoHandler),
             Description = $"Start the {_inner.GeneratorId.Key} generator in interactive mode",
         };
+;
+    }
 
-        int Handler(ColorConsole con)
+    private int GoHandler(ColorConsole con)
+    {
+        var command = new RootCommand("__internal_go_handler__")
         {
-            var command = new RootCommand("__internal_go_handler__")
+            Handler = CommandHandler.Create(_inner.GetGeneratorDelegate(_profiles)),
+            IsHidden = true,
+        };
+
+        var commandArgs = new List<string>();
+
+        con.DarkBlue(Program.RootDescription, ConsoleColor.Gray);
+        con.WriteLine();
+        con.RedLine("Ctrl-C to cancel");
+
+        InfoHandler(con);
+        con.WriteLine();
+
+        if (_inner is IProvideUserArguments argProvider)
+        {
+            foreach (var opt in argProvider.GetUserArguments().Select(arg => new OptionAdapter(arg)))
             {
-                Handler = CommandHandler.Create(_inner.GetGeneratorDelegate(_profiles)),
-                IsHidden = true,
-            };
+                con.GreenLine($"{opt.Description} ({opt.BoundType.Name})");
 
-            var commandArgs = new List<string>();
-
-            con.DarkBlue(Program.RootDescription, ConsoleColor.Gray);
-            con.WriteLine();
-            con.RedLine("Ctrl-C to cancel");
-
-            InfoHandler(con);
-            con.WriteLine();
-
-            if (_inner is IProvideUserArguments argProvider)
-            {
-                foreach (var arg in argProvider.GetUserArguments())
+                string response = string.Empty;
+                while (true)
                 {
-                    Option opt = arg.AsOption();
+                    WritePrompt(con, opt);
 
-                    IValueDescriptor val = opt;
+                    response = Console.ReadLine() ?? string.Empty;
 
-                    con.GreenLine($"{arg.Description} ({opt.ValueType.Name})");
-
-                    string response = string.Empty;
-                    while (true)
+                    if (opt.IsRequired
+                        && !opt.HasDefaultValue
+                        && string.IsNullOrEmpty(response))
                     {
-                        con.Cyan(arg.LongName);
-
-                        if (val.HasDefaultValue)
-                        {
-                            con.Blue($" [{val.GetDefaultValue()}]");
-                        }
-
-                        if (opt.IsRequired && !val.HasDefaultValue)
-                        {
-                            con.Yellow(" *REQUIRED*");
-                        }
-
-                        con.Cyan(": ");
-
-                        response = Console.ReadLine() ?? string.Empty;
-                        if (opt.IsRequired
-                            && !val.HasDefaultValue
-                            && string.IsNullOrEmpty(response))
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        continue;
                     }
 
-                    if (!string.IsNullOrEmpty(response))
+                    break;
+                }
+
+                if (!string.IsNullOrEmpty(response))
+                {
+                    commandArgs.Add($"--{opt.Name}");
+
+                    if (opt.Arity.MaximumNumberOfValues > 1 && !Utilities.IsQuoted(response))
                     {
-                        commandArgs.Add($"--{opt.Name}");
+                            commandArgs.AddRange(response.Split(' '));
+                    }
+                    else
+                    {
                         commandArgs.Add(response);
                     }
-
-                    con.WriteLine();
-                    command.Add(opt);
                 }
+
+                con.WriteLine();
+                command.Add(opt);
+            }
+        }
+
+        return command.Invoke(commandArgs.ToArray());
+
+        static void WritePrompt(ColorConsole con, OptionAdapter opt)
+        {
+            con.Cyan(opt.LongName);
+
+            if (opt.HasDefaultValue)
+            {
+                con.Blue($" [{opt.GetDefaultValuesString()}]");
             }
 
-            var argsArray = commandArgs.ToArray();
-            var displayArgs = argsArray.Select(s => Utilities.QuoteFormat(s));
-            con.YellowLine($"Using: gen {_inner.GeneratorId.Key} run {string.Join(" ", displayArgs)}");
+            if (opt.IsRequired && !opt.HasDefaultValue)
+            {
+                con.Yellow(" *REQUIRED*");
+            }
 
-            return command.Invoke(argsArray);
-        };
+            con.Cyan(": ");
+        }
     }
 }

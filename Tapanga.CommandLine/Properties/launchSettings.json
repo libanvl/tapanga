@@ -19,6 +19,10 @@
     "plugin paths": {
       "commandName": "Project",
       "commandLineArgs": "-pp C:\\Users\\catosfate\\source\\repos\\Tapanga\\Tapanga.Core.Generators\\bin\\Debug\\net6.0 gen"
+    },
+    "vs.razzle go": {
+      "commandName": "Project",
+      "commandLineArgs": " -pp C:\\Users\\catosfate\\source\\repos\\Tapanga.VisualStudio.Razzle\\bin\\Debug\\net6.0\\ gen vs.razzle go"
     }
   }
 }

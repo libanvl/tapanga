@@ -27,13 +27,16 @@ internal class Program
         try
         {
             var console = new ColorConsole();
-            var profiles = new Dictionary<GeneratorId, ProfileCollection>();
+            
 
             ParseResult parseResult = new Parser(PluginPathOption).Parse(args);
             IEnumerable<DirectoryInfo>? pluginPaths = parseResult.ValueForOption(PluginPathOption)?
                 .Where(di => di.Exists);
 
+            var pm = new ProfileManager();
             var gm = new GeneratorManager(s => console.YellowLine(s), pluginPaths.WrapOpt(emptyIsNone: true));
+
+            var profiles = pm.LoadProfiles();
 
             int ret = await BuildCommandLine(gm, profiles)
                 .UseDefaults()
@@ -64,7 +67,7 @@ internal class Program
         }
     }
 
-    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, IDictionary<GeneratorId, ProfileCollection> profilesMap)
+    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, IDictionary<GeneratorId, ProfileDataCollection> profilesMap)
     {
         var rootCommand = new RootCommand(RootDescription)
         {
@@ -78,14 +81,17 @@ internal class Program
 
         foreach (var pg in gm.GetProfileGenerators())
         {
-            ProfileCollection profiles = new();
-            profilesMap.Add(pg.GeneratorId, profiles);
+            if (!profilesMap.TryGetValue(pg.GeneratorId, out var profiles))
+            {
+                profiles = new ProfileDataCollection();
+                profilesMap[pg.GeneratorId] = profiles;
+            }
+
             var innerCommands = new ProfileGeneratorCommandAdapter(profiles, pg);
             generatorCommand.Add(innerCommands.GetCommand());
         }
 
         rootCommand.Add(generatorCommand.WithAlias("gen", "g"));
-
 
         return new CommandLineBuilder(rootCommand);
     }

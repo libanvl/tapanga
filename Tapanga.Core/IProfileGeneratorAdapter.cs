@@ -10,7 +10,7 @@ public interface IProfileGeneratorAdapter
 
     GeneratorInfo GeneratorInfo { get; }
 
-    Delegate GetGeneratorDelegate(IProfileCollection profiles);
+    Delegate GetGeneratorDelegate(IProfileDataCollection profiles);
 
     IReadOnlyList<UserArgument> GetUserArguments();
 }
