@@ -25,7 +25,7 @@ namespace Tapanga.Core
 
         public string Description { get; } = string.Empty;
 
-        public Delegate GetGeneratorDelegate(IProfileCollection profiles) => _inner.GetGeneratorDelegate(profiles);
+        public Delegate GetGeneratorDelegate(IProfileDataCollection profiles) => _inner.GetGeneratorDelegate(profiles);
 
         public virtual IReadOnlyList<UserArgument> GetUserArguments()
         {

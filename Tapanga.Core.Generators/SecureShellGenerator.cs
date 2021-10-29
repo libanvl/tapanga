@@ -54,7 +54,7 @@ public class SecureShellGenerator : DelegateGenerator<SecureShellGenerator.Argum
 
     public override GeneratorInfo GeneratorInfo => GeneratorInfo.Empty;
 
-    protected override int GeneratorCore(IProfileCollection profiles, Arguments args)
+    protected override int GeneratorCore(IProfileDataCollection profiles, Arguments args)
     {
         const string sshResourceName = "Tapanga.Core.Generators.Resources.ssh.png";
 

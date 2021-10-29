@@ -14,7 +14,7 @@ namespace Tapanga.Core.Generators
             new UserArgument<string>("username", "u", "The user to greet", None.String, Required: true)
         };
 
-        public Delegate GetGeneratorDelegate(IProfileCollection profiles)
+        public Delegate GetGeneratorDelegate(IProfileDataCollection profiles)
         {
             return (string username) =>
             {

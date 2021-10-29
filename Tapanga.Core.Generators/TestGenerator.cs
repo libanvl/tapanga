@@ -21,7 +21,7 @@ public class TestGenerator : DelegateGenerator<TestGenerator.Arguments>
         string.Join("\n", typeof(TestGenerator).Assembly.GetManifestResourceNames()),
     };
 
-    protected override int GeneratorCore(IProfileCollection profiles, Arguments args)
+    protected override int GeneratorCore(IProfileDataCollection profiles, Arguments args)
     {
         profiles.Add(new ProfileData(
             Name: NotNullOrThrow(args.ProfileName),

@@ -21,10 +21,13 @@ internal static class UserArgumentExtensions
                 return directoryArg.AsOption();
         }
 
-        var option = new Option($"--{arg.LongName}", arg.Description)
+        var option = new Option($"--{arg.LongName}", arg.Description, arg.ValueType)
         {
             IsRequired = arg.Required
         };
+
+        // defer this to command generation?
+        option.SetDefaultValue(arg.DefaultObject);
 
         AddOptShortName(arg, option);
 
@@ -47,16 +50,6 @@ internal static class UserArgumentExtensions
 
             _ => throw new NotImplementedException()
         };
-
-        if (typeof(T) == typeof(FileInfo))
-        {
-            option = option.LegalFileNamesOnly();
-        }
-
-        if (typeof(T) == typeof(DirectoryInfo))
-        {
-            option = option.LegalFilePathsOnly();
-        }
 
         AddOptShortName(arg, option);
 

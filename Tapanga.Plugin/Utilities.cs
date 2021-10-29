@@ -2,7 +2,7 @@
 
 public static class Utilities
 {
-    public static string GetShortRandomId(int bytes = 4)
+    public static string GetShortRandomId(int bytes = 4, int offset = 0)
     {
         if (bytes > 16 || bytes < 1)
         {
@@ -11,12 +11,22 @@ public static class Utilities
                 nameof(bytes));
         }
 
-        return Convert.ToHexString(Guid.NewGuid().ToByteArray(), 0, bytes).ToLowerInvariant();
+        if (offset + bytes > 16)
+        {
+            throw new ArgumentException(
+                $"total of {nameof(bytes)} + {nameof(offset)} must be less than 16",
+                nameof(offset));
+        }
+
+        Guid guid = Guid.NewGuid();
+        return Convert.ToHexString(guid.ToByteArray(), offset, bytes).ToLowerInvariant();
     }
+
+    public static bool IsQuoted(string v) => (v.First() == '"' || v.First() == '\'') && v.First() == v.Last();
 
     public static string QuoteFormat(string v)
     {
-        if ((v.First() == '"' || v.First() == '\'') && v.First() == v.Last())
+        if (IsQuoted(v))
         {
             return v;
         }

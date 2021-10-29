@@ -1,7 +1,7 @@
 ﻿
 namespace Tapanga.Plugin
 {
-    public interface IProfileCollection
+    public interface IProfileDataCollection
     {
         int Count { get; }
 
