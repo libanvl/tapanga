@@ -23,6 +23,8 @@ internal class OptionAdapter : IOption
 
     public static implicit operator Option(OptionAdapter adapter) => adapter._option;
 
+    public static implicit operator UserArgument(OptionAdapter adapter) => adapter._userArgument;
+
     public Type BoundType { get; }
 
     public string LongName => _userArgument.LongName;

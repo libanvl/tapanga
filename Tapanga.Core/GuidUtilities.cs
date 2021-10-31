@@ -5,9 +5,12 @@ namespace Tapanga.Core;
 
 public static class GuidUtilities
 {
-    public static readonly Guid WindowsTerminalNamespaceGuid = new("2BDE4A90-D05F-401C-9492-E40884EAD1D8");
+    public static class WindowsTerminal
+    {
+        public static readonly Guid Namespace = new("2BDE4A90-D05F-401C-9492-E40884EAD1D8");
 
-    public static readonly Guid WindowsTerminalGeneratedNamespaceGuid = new(0xf65ddb7e, 0x706b, 0x4499, 0x8a, 0x50, 0x40, 0x31, 0x3c, 0xaf, 0x51, 0x0a);
+        public static readonly Guid GeneratedProfileNamespace = new(0xf65ddb7e, 0x706b, 0x4499, 0x8a, 0x50, 0x40, 0x31, 0x3c, 0xaf, 0x51, 0x0a);
+    }
 
     public static Guid NameToGuid(Guid namespaceGuid, string name)
     {

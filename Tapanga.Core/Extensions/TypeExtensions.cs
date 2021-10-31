@@ -1,6 +1,4 @@
-﻿using Microsoft;
-using System.Reflection;
-using Tapanga.Plugin;
+﻿using System.Reflection;
 
 namespace Tapanga.Core;
 
@@ -46,33 +44,5 @@ public static class TypeExtensions
         }
 
         return type == boundType;
-    }
-
-    public static GeneratorId GetGeneratorId(this IProfileGenerator generator)
-    {
-        Type generatorType = generator.GetType();
-        if (generatorType.GetCustomAttribute<ProfileGeneratorAttribute>(inherit: true) is ProfileGeneratorAttribute attr)
-        {
-            var assemblyName = generatorType.Assembly.GetName();
-            var assemblySimple = assemblyName.Name;
-            var assemblyVersion = assemblyName.Version;
-
-            Assumes.NotNull(assemblySimple);
-            Assumes.NotNull(assemblyVersion);
-
-            return new GeneratorId(
-                key: attr.Key,
-                version: attr.Version,
-                assemblyName: assemblySimple,
-                assemblyVersion: assemblyVersion);
-        }
-
-        throw new ArgumentException($"Profile generators must be decorated with {nameof(ProfileGeneratorAttribute)}", nameof(generator));
-    }
-
-    internal static Guid GetProfileId(this ProfileData profileData)
-    {
-        Guid namespaceGuid = GuidUtilities.NameToGuid(GuidUtilities.WindowsTerminalGeneratedNamespaceGuid, "Tapanga");
-        return GuidUtilities.NameToGuid(namespaceGuid, profileData.Name);
     }
 }
