@@ -14,7 +14,11 @@ internal class Program
         new Option<IEnumerable<DirectoryInfo>>(
             "--plugin-path",
             description: "Directory to search for plugin assemblies. Accepts mutiple options.",
-            getDefaultValue: () => new[] { new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location)!) })
+            getDefaultValue: () => new[]
+            { 
+                new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location)!)
+            }
+        )
         {
             AllowMultipleArgumentsPerToken = true,
             Arity = ArgumentArity.ExactlyOne,
@@ -24,21 +28,20 @@ internal class Program
 
     public static async Task<int> Main(string[] args)
     {
+        var console = new ColorConsole();
+
         try
         {
-            var console = new ColorConsole();
-            
-
             ParseResult parseResult = new Parser(PluginPathOption).Parse(args);
             IEnumerable<DirectoryInfo>? pluginPaths = parseResult.ValueForOption(PluginPathOption)?
                 .Where(di => di.Exists);
 
-            var pm = new ProfileManager();
             var gm = new GeneratorManager(s => console.YellowLine(s), pluginPaths.WrapOpt(emptyIsNone: true));
+            var pm = new ProfileManager(gm);
 
-            var profiles = pm.LoadProfiles();
+            var profilesMap = pm.LoadProfiles();
 
-            int ret = await BuildCommandLine(gm, profiles)
+            int ret = await BuildCommandLine(gm, profilesMap)
                 .UseDefaults()
                 .BuildServiceMiddleware(console)
                 .Build()
@@ -49,25 +52,38 @@ internal class Program
                 return ret;
             }
 
-            foreach (var collection in profiles.Values)
+            if (parseResult.Directives.Contains("dry-run"))
             {
-                foreach (var p in collection)
+                console.MagentaLine("Running in Dry Run mode");
+                foreach (var (generatorId, profiles) in profilesMap)
                 {
-                    Console.WriteLine($"PROFILE: {p}");
+                    console.CyanLine(generatorId, ConsoleColor.DarkBlue);
+
+                    foreach (var p in profiles)
+                    {
+                        console.GrayLine(p, ConsoleColor.DarkBlue);
+                    }
                 }
             }
-
-            new ProfileManager().WriteProfiles(profiles);
+            else
+            {
+                pm.WriteProfiles(profilesMap);
+            }
 
             return 0;
         }
+        catch (Exception ex)
+        {
+            console.RedLine(ex.Message);
+            return -1;
+        }
         finally
         {
-            Console.ResetColor();
+            console.Reset();
         }
     }
 
-    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, IDictionary<GeneratorId, ProfileDataCollection> profilesMap)
+    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, ProfileCollectionMap profilesMap)
     {
         var rootCommand = new RootCommand(RootDescription)
         {
@@ -81,17 +97,11 @@ internal class Program
 
         foreach (var pg in gm.GetProfileGenerators())
         {
-            if (!profilesMap.TryGetValue(pg.GeneratorId, out var profiles))
-            {
-                profiles = new ProfileDataCollection();
-                profilesMap[pg.GeneratorId] = profiles;
-            }
-
-            var innerCommands = new ProfileGeneratorCommandAdapter(profiles, pg);
+            var innerCommands = new CommandAdapter(pg, profilesMap[pg.GeneratorId]);
             generatorCommand.Add(innerCommands.GetCommand());
         }
 
-        rootCommand.Add(generatorCommand.WithAlias("gen", "g"));
+        rootCommand.Add(generatorCommand.WithAlias("gen"));
 
         return new CommandLineBuilder(rootCommand);
     }

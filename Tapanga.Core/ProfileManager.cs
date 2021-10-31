@@ -1,5 +1,4 @@
-﻿using Microsoft;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Tapanga.Core.Serialization;
 using Tapanga.Plugin;
 
@@ -7,115 +6,137 @@ namespace Tapanga.Core;
 
 public class ProfileManager
 {
-    private const string profilesJsonFile = "tapanga.json";
-
     // C:\Users\< user >\AppData\Local\Microsoft\Windows Terminal\Fragments\{ext}\{ file - name}.json
-    private static readonly string fragmentsPath = Path.Combine(
+    private static readonly string fragmentsRootPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Microsoft",
             "Windows Terminal",
-            "Fragments",
-            "Tapanga");
+            "Fragments");
 
-    public IDictionary<GeneratorId, ProfileDataCollection> LoadProfiles()
+    private readonly IEnumerable<IProfileGeneratorAdapter> _generators;
+
+    public ProfileManager(GeneratorManager generatorManager)
     {
-        var root = new FragmentRoot();
+        _generators = generatorManager.GetProfileGenerators();
+    }
 
-        string filepath = Path.Combine(fragmentsPath, profilesJsonFile);
-        if (File.Exists(filepath))
+    public ProfileCollectionMap LoadProfiles()
+    {
+        var result = new ProfileCollectionMap();
+
+        foreach (var generator in _generators)
         {
-            using (var fileStream = File.OpenRead(filepath))
+            string pluginFile = generator.GeneratorId.GetFragmentFilePath(fragmentsRootPath);
+
+            if (File.Exists(pluginFile))
             {
-                root = JsonSerializer.Deserialize<FragmentRoot>(fileStream)!;
-                // better null handling
-                Assumes.NotNull(root);
+                FragmentRoot root;
+                using (var fileStream = File.OpenRead(pluginFile))
+                {
+                    root = JsonSerializer.Deserialize<FragmentRoot>(fileStream)!;
+                    if (root is null || !root.Profiles.Any())
+                    {
+                        // TODO log info: no profiles
+                        continue;
+                    }
+                }
+
+                // TODO check tapanga versions are compatible
+
+                foreach (var profile in root.Profiles)
+                {
+                    result[generator.GeneratorId].Add(GetProfileData(profile));
+                }
             }
-
-            // check tapanga versions are compatible
-        }
-
-        var result = new Dictionary<GeneratorId, ProfileDataCollection>();
-
-        foreach (var profile in root.Profiles)
-        {
-            if (!result.TryGetValue(profile.TapangaMetadata.GeneratorId!, out var dataCollection))
-            {
-                dataCollection = new ProfileDataCollection();
-                result[profile.TapangaMetadata.GeneratorId!] = dataCollection;
-            }
-
-            dataCollection.Add(profile.AsProfileData());
         }
 
         return result;
     }
 
-    public void WriteProfiles(IDictionary<GeneratorId, ProfileDataCollection> profilesMap)
+    public void WriteProfiles(ProfileCollectionMap profilesMap)
     {
-        if (profilesMap.Count < 1)
+        if (!profilesMap.Any())
         {
             return;
         }
 
-        var fragmentProfiles = new List<Profile>();
         foreach (var (generatorId, profiles) in profilesMap)
         {
-            foreach (var pro in profiles)
+            if (!profiles.Any())
             {
-                var metadata = new TapangaMetadata
-                {
-                    ProfileId = pro.GetProfileId(),
-                    GeneratorId = generatorId
-                };
-
-                var fragmentProfile = new Profile
-                {
-                    Commandline = pro.CommandLine,
-                    Name = pro.Name,
-                    TapangaMetadata = metadata,
-                };
-
-                if (pro.StartingDirectory is Opt<DirectoryInfo>.Some someDirectoryInfo)
-                {
-                    fragmentProfile.StartingDirectory = someDirectoryInfo.Value.FullName;
-                }
-
-                if (pro.TabTitle is Opt<string>.Some someTabTitle)
-                {
-                    fragmentProfile.TabTitle = someTabTitle.Value;
-                }
-
-                if (pro.Icon is Opt<Icon>.Some someIcon)
-                {
-                    if (SerializeIcon(generatorId, someIcon) is Opt<PathIcon>.Some somePathIcon)
-                    {
-                        fragmentProfile.Icon = somePathIcon.Value.Path;
-                    }
-                }
-
-                fragmentProfiles.Add(fragmentProfile);
+                continue;
             }
+
+            string pluginPath = generatorId.GetPluginSerializationPath(fragmentsRootPath);
+            Directory.CreateDirectory(pluginPath);
+
+            string profilesFilePath = generatorId.GetFragmentFilePath(fragmentsRootPath);
+            File.WriteAllText(profilesFilePath, GetFragmentProfilesJson(generatorId, profiles));
         }
+    }
 
-        var profilePathInfo = Directory.CreateDirectory(fragmentsPath);
-        var root = new FragmentRoot();
-        string filepath = Path.Combine(profilePathInfo.FullName, profilesJsonFile);
+    private string GetFragmentProfilesJson(GeneratorId generatorId, ProfileDataCollection profiles)
+    {
+        List<Profile> fragmentProfiles = GetFragmentProfiles(generatorId, profiles);
 
-        root.TapangaVersion = new TapangaVersion(
-            typeof(IProfileGenerator).Assembly.GetName().Version ?? new Version(0, 0),
-            GetType().Assembly.GetName().Version ?? new Version(0, 0));
+        var root = new FragmentRoot
+        {
+            TapangaVersion = new TapangaVersion(
+                typeof(IProfileGenerator).Assembly.GetName().Version ?? new Version(0, 0),
+                GetType().Assembly.GetName().Version ?? new Version(0, 0))
+        };
 
         root.Profiles.AddRange(fragmentProfiles);
 
-        var data = JsonSerializer.Serialize(root, new JsonSerializerOptions
+        return JsonSerializer.Serialize(root, new JsonSerializerOptions
         {
             WriteIndented = true
         });
-
-        File.WriteAllText(filepath, data);
     }
 
-    private Opt<PathIcon> SerializeIcon(GeneratorId generatorId, Opt<Icon> optIcon)
+    private static List<Profile> GetFragmentProfiles(GeneratorId generatorId, ProfileDataCollection profiles)
+    {
+        var fragmentProfiles = new List<Profile>();
+
+        foreach (var pro in profiles)
+        {
+            var metadata = new TapangaMetadata
+            {
+                ProfileId = pro.GetProfileId(generatorId)
+            };
+
+            var fragmentProfile = new Profile
+            {
+                Commandline = pro.CommandLine,
+                Name = pro.Name,
+                TapangaMetadata = metadata,
+            };
+
+            if (pro.StartingDirectory is Opt<DirectoryInfo>.Some someDirectoryInfo)
+            {
+                fragmentProfile.StartingDirectory = someDirectoryInfo.Value.FullName;
+            }
+
+            if (pro.TabTitle is Opt<string>.Some someTabTitle)
+            {
+                fragmentProfile.TabTitle = someTabTitle.Value;
+            }
+
+            if (pro.Icon is Opt<Icon>.Some someIcon)
+            {
+                if (SerializeIcon(generatorId, someIcon) is Opt<PathIcon>.Some somePathIcon)
+                {
+                    fragmentProfile.Icon = somePathIcon.Value.Path;
+                }
+            }
+
+            fragmentProfiles.Add(fragmentProfile);
+        }
+
+        return fragmentProfiles;
+    }
+
+    private static Opt<PathIcon> SerializeIcon(GeneratorId generatorId, Opt<Icon> optIcon)
     {
         if (optIcon is Opt<Icon>.Some someIcon)
         {
@@ -127,10 +148,10 @@ public class ProfileManager
             if (someIcon.Value is StreamIcon streamIcon)
             {
                 var iconsDirectory = Directory.CreateDirectory(
-                    Path.Combine(fragmentsPath, "Icons", $"{generatorId.AssemblyName}.{generatorId.AssemblyVersion}"));
+                    Path.Combine(generatorId.GetPluginSerializationPath(fragmentsRootPath), "Icons"));
 
                 string iconPath = Path.Combine(iconsDirectory.FullName, streamIcon.Name);
-                if (File.Exists(iconPath))
+                if (!File.Exists(iconPath))
                 {
                     using var fs = new FileStream(iconPath, FileMode.Create);
                     streamIcon.Stream.CopyTo(fs);
@@ -141,5 +162,16 @@ public class ProfileManager
         }
 
         return Opt.None<PathIcon>();
+    }
+
+    private static ProfileData GetProfileData(Profile profile)
+    {
+        return new ProfileData(
+            profile.Name!,
+            profile.Commandline!,
+            string.IsNullOrWhiteSpace(profile.StartingDirectory) ? Opt.None<DirectoryInfo>() : new DirectoryInfo(profile.StartingDirectory),
+            profile.TabTitle!,
+            string.IsNullOrWhiteSpace(profile.Icon) ? Opt.None<Icon>() : new PathIcon(Path.GetFileName(profile.Icon), profile.Icon)
+        );
     }
 }

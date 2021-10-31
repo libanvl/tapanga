@@ -4,7 +4,7 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-using ProfileGenerators = IEnumerable<IProfileGeneratorAdapter>;
+using ProfileGenerators = List<IProfileGeneratorAdapter>;
 
 public class GeneratorManager
 {
@@ -33,7 +33,7 @@ public class GeneratorManager
                 MatchCasing = MatchCasing.CaseInsensitive,
             }));
 
-            cachedGenerators = Opt.Some(dllPaths.SelectMany(dll => CreateGenerators(LoadPlugin(dll))));
+            cachedGenerators = Opt.Some(dllPaths.SelectMany(dll => CreateGenerators(LoadPlugin(dll))).ToList());
         }
 
         if (cachedGenerators is Opt<ProfileGenerators>.Some someGenerators)
@@ -41,7 +41,7 @@ public class GeneratorManager
             return someGenerators.Value;
         }
 
-        return Enumerable.Empty<ProfileGeneratorAdapter>();
+        return new ProfileGenerators();
     }
 
     private static Assembly LoadPlugin(string absolutePath)
@@ -50,7 +50,7 @@ public class GeneratorManager
         return loadContext.LoadFromAssemblyPath(absolutePath);
     }
 
-    private ProfileGenerators CreateGenerators(Assembly assembly)
+    private IEnumerable<IProfileGeneratorAdapter> CreateGenerators(Assembly assembly)
     {
         if (assembly.GetCustomAttribute<PluginAssemblyAttribute>() is null)
         {

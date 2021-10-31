@@ -12,6 +12,8 @@ public class GeneratorInfo : IReadOnlyList<string>, IEnumerable<string>
     {
     }
 
+    public static implicit operator GeneratorInfo(string arg) => new(arg.Split(Environment.NewLine).ToList());
+
     public static GeneratorInfo Empty { get; } = new GeneratorInfo(Enumerable.Empty<string>().ToList());
 
     public string this[int index] => ((IReadOnlyList<string>)_inner)[index];
@@ -25,6 +27,4 @@ public class GeneratorInfo : IReadOnlyList<string>, IEnumerable<string>
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_inner).GetEnumerator();
 
     public override string ToString() => String.Join(Environment.NewLine, _inner);
-
-    public static implicit operator GeneratorInfo(string arg) => new(arg.Split(Environment.NewLine).ToList());
 }

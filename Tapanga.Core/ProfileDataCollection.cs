@@ -13,7 +13,7 @@ public class ProfileDataCollection : ICollection<ProfileData>, IProfileDataColle
 
     public void Add(ProfileData item)
     {
-        if (inner.Any(pd => pd.GetProfileId() == item.GetProfileId()))
+        if (inner.Any(pd => pd.Name == item.Name))
         {
             item = item with { Name = $"{item.Name} {Utilities.GetShortRandomId(bytes: 3)}" };
         }

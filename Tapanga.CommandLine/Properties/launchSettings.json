@@ -14,7 +14,7 @@
     },
     "gen ssh go": {
       "commandName": "Project",
-      "commandLineArgs": " gen core.ssh go"
+      "commandLineArgs": "gen core.ssh go"
     },
     "plugin paths": {
       "commandName": "Project",
