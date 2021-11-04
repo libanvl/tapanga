@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using libanvl;
+using Microsoft;
+using System.Reflection;
 using System.Runtime.Loader;
 using Tapanga.Plugin;
 
@@ -9,31 +11,30 @@ using ProfileGenerators = List<IProfileGeneratorAdapter>;
 public class GeneratorManager
 {
     private static Opt<ProfileGenerators> cachedGenerators = Opt.None<ProfileGenerators>();
-    private readonly Action<string> _infoLog;
     private readonly Opt<IEnumerable<DirectoryInfo>> _pluginPaths;
 
-    public GeneratorManager(Action<string> infoLog, Opt<IEnumerable<DirectoryInfo>> pluginPaths)
+    public GeneratorManager(Opt<IEnumerable<DirectoryInfo>> pluginPaths)
     {
-        _infoLog = infoLog;
         _pluginPaths = pluginPaths;
     }
 
     public ProfileGenerators GetProfileGenerators()
     {
-        if (cachedGenerators is Opt<ProfileGenerators>.None)
+        if (cachedGenerators.IsNone)
         {
-            IEnumerable<string> pluginsPaths = _pluginPaths switch
-            {
-                Opt<IEnumerable<DirectoryInfo>>.Some some => some.Value.Select(di => di.FullName),
-                _ => Enumerable.Empty<string>()
-            };
+            IEnumerable<string> pluginsPaths = _pluginPaths
+                .SomeOrEmpty()
+                .Select(di => di.FullName);
 
             var dllPaths = pluginsPaths.SelectMany(pp => Directory.EnumerateFiles(pp, "*.dll", new EnumerationOptions
             {
                 MatchCasing = MatchCasing.CaseInsensitive,
             }));
 
-            cachedGenerators = Opt.Some(dllPaths.SelectMany(dll => CreateGenerators(LoadPlugin(dll))).ToList());
+            cachedGenerators = Opt.Some(
+                dllPaths
+                .SelectMany(dll => CreateGenerators(LoadPlugin(dll)))
+                .ToList());
         }
 
         if (cachedGenerators is Opt<ProfileGenerators>.Some someGenerators)
@@ -41,7 +42,7 @@ public class GeneratorManager
             return someGenerators.Value;
         }
 
-        return new ProfileGenerators();
+        return Assumes.NotReachable<ProfileGenerators>();
     }
 
     private static Assembly LoadPlugin(string absolutePath)
@@ -87,20 +88,24 @@ public class GeneratorManager
         {
             throw new InvalidOperationException($"No plugins found in Tapanga plugin assembly: {assembly.GetName().Name}");
         }
-
-        _infoLog($"Loaded {count} generators from: {assembly.Location}");
     }
 
     private class PluginLoadContext : AssemblyLoadContext
     {
+        private static readonly string[] sharedAssemblies = new[]
+        {
+            typeof(IProfileGenerator).Assembly.FullName!,
+            typeof(OptBase).Assembly.FullName!,
+        };
+
         private readonly AssemblyDependencyResolver _resolver;
 
         public PluginLoadContext(string pluginPath) => _resolver = new AssemblyDependencyResolver(pluginPath);
 
         protected override Assembly? Load(AssemblyName assemblyName)
         {
-            // ensure the plugin base assembly is only loaded by the entry assembly
-            if (assemblyName.FullName == typeof(IProfileGenerator).Assembly.FullName)
+            // ensure the shared assemblies are not loaded in this context
+            if (sharedAssemblies.Contains(assemblyName.FullName))
             {
                 return null;
             }

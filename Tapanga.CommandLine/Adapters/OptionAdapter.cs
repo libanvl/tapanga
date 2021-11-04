@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using libanvl;
+using System.Collections;
 using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Collections;
@@ -57,7 +58,7 @@ internal class OptionAdapter : IOption
 
     object? IValueDescriptor.GetDefaultValue()
     {
-        return this.GetDefaultValue().SomeOrDefault(default!);
+        return GetDefaultValue().SomeOrNull();
     }
 
     public string GetDefaultValuesString()

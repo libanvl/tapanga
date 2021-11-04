@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using libanvl;
+using System.ComponentModel;
 using Tapanga.Plugin;
 
 namespace Tapanga.Core.Generators;
@@ -28,7 +29,7 @@ public class TestGenerator : DelegateGenerator<TestGenerator.Arguments>
             CommandLine: $"echo {args.Greeting.FormatParameter()}",
             StartingDirectory: args.StartingDirectory.WrapOpt(),
             TabTitle: args.ProfileTitle.WrapOpt(whitespaceIsNone: true),
-            Icon: Opt.None<Icon>()));
+            Icon: Opt<Icon>.None));
 
         return 0;
     }

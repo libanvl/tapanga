@@ -1,13 +1,5 @@
 {
   "profiles": {
-    "Tapanga": {
-      "commandName": "Project",
-      "commandLineArgs": "gen core.test info"
-    },
-    "gen test run": {
-      "commandName": "Project",
-      "commandLineArgs": "gen core.test run -g \"Hey Babes!\" -pn \"My Profile Name\" -pd \"C:\\Users\\\""
-    },
     "gen ssh run": {
       "commandName": "Project",
       "commandLineArgs": " gen core.ssh run --destination n7ewx@silo.ewx --profilename \"ssh silo\" --profiletitle \"Hello Silo!\""
@@ -20,9 +12,25 @@
       "commandName": "Project",
       "commandLineArgs": "-pp C:\\Users\\catosfate\\source\\repos\\Tapanga\\Tapanga.Core.Generators\\bin\\Debug\\net6.0 gen"
     },
-    "vs.razzle go": {
+    "gen core.simple info": {
       "commandName": "Project",
-      "commandLineArgs": " -pp C:\\Users\\catosfate\\source\\repos\\Tapanga.VisualStudio.Razzle\\bin\\Debug\\net6.0\\ gen vs.razzle go"
+      "commandLineArgs": "[output:ansi] gen core.simple info"
+    },
+    "gen core.ssh info": {
+      "commandName": "Project",
+      "commandLineArgs": "[output:ansi] gen core.ssh info"
+    },
+    "gen core.demo info": {
+      "commandName": "Project",
+      "commandLineArgs": "[output:ansi] gen core.demo info"
+    },
+    "pro list": {
+      "commandName": "Project",
+      "commandLineArgs": "[output:ansi] pro list"
+    },
+    "!!pro rm": {
+      "commandName": "Project",
+      "commandLineArgs": "pro rm 1144bd"
     }
   }
 }

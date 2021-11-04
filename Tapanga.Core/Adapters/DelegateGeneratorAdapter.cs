@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using libanvl;
+using System.ComponentModel;
 using System.Reflection;
 using Tapanga.Plugin;
 
@@ -58,7 +59,7 @@ internal class DelegateGeneratorAdapter : ProfileGeneratorAdapter, IDelegateProf
                     typeof(int) /* Sort */
             }) is Opt<ConstructorInfo>.Some someCtor)
             {
-                object? defaultOptValue = defaultOptType.GetProperty("NoneInstance", BindingFlags.Static | BindingFlags.Public)?.GetValue(null);
+                object? defaultOptValue = defaultOptType.GetProperty(nameof(Opt<object>.None), BindingFlags.Static | BindingFlags.Public)?.GetValue(null);
                 var valfac = p.GetCustomAttribute<DefaultValueFactoryAttribute>();
                 if (valfac is not null)
                 {

@@ -1,7 +1,8 @@
-﻿using System.CommandLine;
+﻿using libanvl;
+using System.CommandLine;
 using System.CommandLine.Builder;
+using System.CommandLine.IO;
 using System.CommandLine.Parsing;
-using System.Reflection;
 using Tapanga.Core;
 
 namespace Tapanga.CommandLine;
@@ -16,7 +17,7 @@ internal class Program
             description: "Directory to search for plugin assemblies. Accepts mutiple options.",
             getDefaultValue: () => new[]
             { 
-                new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location)!)
+                new DirectoryInfo(AppContext.BaseDirectory)
             }
         )
         {
@@ -36,13 +37,15 @@ internal class Program
             IEnumerable<DirectoryInfo>? pluginPaths = parseResult.ValueForOption(PluginPathOption)?
                 .Where(di => di.Exists);
 
-            var gm = new GeneratorManager(s => console.YellowLine(s), pluginPaths.WrapOpt(emptyIsNone: true));
+            var gm = new GeneratorManager(pluginPaths.WrapOpt(emptyIsNone: true));
             var pm = new ProfileManager(gm);
 
-            var profilesMap = pm.LoadProfiles();
+            var newProfilesMap = new ProfileDataCollectionMap();
 
-            int ret = await BuildCommandLine(gm, profilesMap)
+            int ret = await BuildCommandLine(gm, pm, newProfilesMap)
                 .UseDefaults()
+                .EnableDirectives()
+                .ConfigureConsole(bc => new SystemConsole())
                 .BuildServiceMiddleware(console)
                 .Build()
                 .InvokeAsync(args);
@@ -55,7 +58,7 @@ internal class Program
             if (parseResult.Directives.Contains("dry-run"))
             {
                 console.MagentaLine("Running in Dry Run mode");
-                foreach (var (generatorId, profiles) in profilesMap)
+                foreach (var (generatorId, profiles) in newProfilesMap)
                 {
                     console.CyanLine(generatorId, ConsoleColor.DarkBlue);
 
@@ -67,7 +70,12 @@ internal class Program
             }
             else
             {
-                pm.WriteProfiles(profilesMap);
+                foreach (var (generatorId, profiles) in newProfilesMap)
+                {
+                    pm.AddProfileData(generatorId, profiles);
+                }
+
+                return pm.Write() ? 0 : -1;
             }
 
             return 0;
@@ -75,7 +83,7 @@ internal class Program
         catch (Exception ex)
         {
             console.RedLine(ex.Message);
-            return -1;
+            return -2;
         }
         finally
         {
@@ -83,7 +91,7 @@ internal class Program
         }
     }
 
-    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, ProfileCollectionMap profilesMap)
+    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, ProfileManager pm, ProfileDataCollectionMap newProfilesMap)
     {
         var rootCommand = new RootCommand(RootDescription)
         {
@@ -97,11 +105,14 @@ internal class Program
 
         foreach (var pg in gm.GetProfileGenerators())
         {
-            var innerCommands = new CommandAdapter(pg, profilesMap[pg.GeneratorId]);
+            var innerCommands = new GeneratorCommandAdapter(pg, newProfilesMap[pg.GeneratorId]);
             generatorCommand.Add(innerCommands.GetCommand());
         }
 
         rootCommand.Add(generatorCommand.WithAlias("gen"));
+
+        var profileCommandAdapter = new ProfileCommandAdapter(pm);
+        rootCommand.Add(profileCommandAdapter.GetCommand().WithAlias("pro"));
 
         return new CommandLineBuilder(rootCommand);
     }

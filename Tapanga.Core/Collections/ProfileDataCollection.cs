@@ -3,13 +3,13 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-public class ProfileDataCollection : ICollection<ProfileData>, IProfileDataCollection
+public class ProfileDataCollection : IReadOnlyList<ProfileData>, IProfileDataCollection
 {
     private readonly List<ProfileData> inner = new();
 
-    public int Count => inner.Count;
+    public ProfileData this[int index] => ((IReadOnlyList<ProfileData>)inner)[index];
 
-    public bool IsReadOnly => ((ICollection<ProfileData>)inner).IsReadOnly;
+    public int Count => inner.Count;
 
     public void Add(ProfileData item)
     {
@@ -21,15 +21,9 @@ public class ProfileDataCollection : ICollection<ProfileData>, IProfileDataColle
         inner.Add(item);
     }
 
-    public void Clear() => inner.Clear();
-
     public bool Contains(ProfileData item) => inner.Contains(item);
 
-    public void CopyTo(ProfileData[] array, int arrayIndex) => inner.CopyTo(array, arrayIndex);
-
     public IEnumerator<ProfileData> GetEnumerator() => inner.GetEnumerator();
-
-    public bool Remove(ProfileData item) => inner.Remove(item);
 
     IEnumerator IEnumerable.GetEnumerator() => inner.GetEnumerator();
 }
