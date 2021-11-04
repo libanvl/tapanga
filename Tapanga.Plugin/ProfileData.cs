@@ -1,4 +1,6 @@
-﻿namespace Tapanga.Plugin;
+﻿using libanvl;
+
+namespace Tapanga.Plugin;
 
 /// <summary>
 /// Describes a Terminal Profile.

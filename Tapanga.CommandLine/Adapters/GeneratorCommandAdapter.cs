@@ -1,17 +1,20 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
 using System.CommandLine.Parsing;
+using System.CommandLine.Rendering;
 using Tapanga.Core;
 using Tapanga.Plugin;
 
 namespace Tapanga.CommandLine;
 
-internal class CommandAdapter
+internal class GeneratorCommandAdapter
 {
     private readonly IProfileGeneratorAdapter _inner;
     private readonly ProfileDataCollection _profiles;
 
-    public CommandAdapter(IProfileGeneratorAdapter profileGenerator, ProfileDataCollection profiles)
+    public GeneratorCommandAdapter(IProfileGeneratorAdapter profileGenerator, ProfileDataCollection profiles)
     {
         _inner = profileGenerator;
         _profiles = profiles;
@@ -24,25 +27,18 @@ internal class CommandAdapter
         GetRunCommand()
     };
 
-    private Command GetInfoCommand() => new Command("info")
+    private Command GetInfoCommand() => new("info")
     {
         Handler = CommandHandler.Create(InfoHandler),
         Description = $"Get extra information about the {_inner.GeneratorId.Key} generator",
     };
 
-    private void InfoHandler(ColorConsole con)
+    private void InfoHandler(SystemConsole console)
     {
-        var info = _inner.GeneratorInfo;
-        con.MagentaLine(_inner.GeneratorId.Key);
-
-        if (info.Any())
-        {
-            con.GreenLine(info);
-        }
-        else
-        {
-            con.YellowLine($"No info found for generator {_inner.GeneratorId.Key}");
-        }
+        var terminal = console.GetTerminal();
+        terminal.Clear();
+        var view = new ProfileGeneratorView(_inner);
+        view.Render(new ConsoleRenderer(terminal, resetAfterRender: true), Region.Scrolling);
     }
 
     private Command GetRunCommand()
@@ -71,10 +67,9 @@ internal class CommandAdapter
             Handler = CommandHandler.Create(GoHandler),
             Description = $"Start the {_inner.GeneratorId.Key} generator in interactive mode",
         };
-;
     }
 
-    private int GoHandler(ColorConsole con)
+    private int GoHandler(SystemConsole systemConsole, ColorConsole con)
     {
         var command = new RootCommand("__internal_go_handler__")
         {
@@ -88,7 +83,7 @@ internal class CommandAdapter
         con.WriteLine();
         con.RedLine("Ctrl-C to cancel");
 
-        InfoHandler(con);
+        InfoHandler(systemConsole);
         con.WriteLine();
 
         if (_inner is IProvideUserArguments argProvider)

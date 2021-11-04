@@ -8,4 +8,8 @@
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="libanvl.opt" Version="1.5.9-beta" />
+  </ItemGroup>
+
 </Project>

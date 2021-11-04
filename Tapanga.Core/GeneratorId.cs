@@ -14,15 +14,11 @@ public record GeneratorId
 
     public static GeneratorId None { get; } = new GeneratorId(string.Empty, new Version(), string.Empty, new Version());
 
-    [JsonPropertyName("name")]
     public string Key { get; init; }
 
-    [JsonPropertyName("version")]
     public Version Version { get; init; }
 
-    [JsonPropertyName("assemblyName")]
     public string AssemblyName { get; init; }
 
-    [JsonPropertyName("assemblyVersion")]
     public Version AssemblyVersion { get; init; }
 }
