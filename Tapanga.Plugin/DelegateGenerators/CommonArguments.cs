@@ -13,10 +13,7 @@ public class CommonArguments
     [DefaultValueFactory(nameof(GetDefaultStartingDirectory))]
     public DirectoryInfo? StartingDirectory { get; set; }
 
-    public static string GetDefaultProfileName()
-    {
-        return $"tapanga profile {Utilities.GetShortRandomId()}";
-    }
+    public static string GetDefaultProfileName() => $"tapanga profile {Utilities.GetShortRandomId()}";
 
     public static DirectoryInfo GetDefaultStartingDirectory()
     {

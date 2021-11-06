@@ -1,0 +1,47 @@
+name: NuGet Release
+on:
+  release:
+    types:
+      - published
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+# GitHub Packages Feed settings
+  GITHUB_FEED: https://nuget.pkg.github.com/libanvl/index.json
+  GITHUB_USER: libanvl
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# Official NuGet Feed settings
+  NUGET_FEED: https://api.nuget.org/v3/index.json
+  NUGET_TOKEN: ${{ secrets.NUGET_PUSH_KEY }}
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+          include-prerelease: true
+      - name: Nerdbank.GitVersioning
+        uses: dotnet/nbgv@v0.4.0
+        with:
+          setCommonVars: true
+        id: nbgv
+      - name: Restore
+        run: dotnet restore
+      - name: Cloud Build Version
+        run: nbgv cloud
+      - name: Build
+        run: dotnet build --configuration Release --no-restore -p:ContinuousIntegrationBuild=true 
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+      - name: Create Release NuGet package
+        run: dotnet pack --configuration Release --no-restore --no-build --include-symbols --include-source --output nupkg -p:PublicRelease=true -p:SymbolPackageFormat=snupkg
+      - name: Push to GitHub Feed
+        run: dotnet nuget push ./nupkg/*.*nupkg --source ${GITHUB_FEED} --api-key ${GITHUB_TOKEN}
+      - name: Push to NuGet Feed
+        run: dotnet nuget push ./nupkg/*.nupkg --source ${NUGET_FEED} --skip-duplicate --api-key ${NUGET_TOKEN}

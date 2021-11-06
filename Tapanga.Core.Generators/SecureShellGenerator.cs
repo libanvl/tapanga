@@ -59,11 +59,11 @@ public class SecureShellGenerator : DelegateGenerator<SecureShellGenerator.Argum
     {
         const string sshResourceName = "Tapanga.Core.Generators.Resources.ssh.png";
 
-        Opt<Icon> icon = Assembly.GetExecutingAssembly().GetOptIcon(sshResourceName);
+        Opt<Icon> icon = Assembly.GetExecutingAssembly().GetStreamIcon(sshResourceName);
 
         ProfileData profile = new(
             NotNullOrThrow(args.ProfileName),
-            $"{args.SshExe}{args.Verbose.FormatParameter("-v")}{args.Opts.FormatParameter()}{NotNullOrThrow(args.Destination).ToString().FormatParameter()}{args.Command.FormatParameter()}",
+            $"{args.SshExe}{args.Verbose.Format("-v")}{args.Opts.Format()}{NotNullOrThrow(args.Destination).ToString().Format()}{args.Command.Format()}",
             args.StartingDirectory.WrapOpt(),
             args.ProfileTitle.WrapOpt(whitespaceIsNone: true),
             icon);

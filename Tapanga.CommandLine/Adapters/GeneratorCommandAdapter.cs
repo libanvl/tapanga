@@ -1,5 +1,4 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
@@ -84,7 +83,8 @@ internal class GeneratorCommandAdapter
         con.RedLine("Ctrl-C to cancel");
 
         InfoHandler(systemConsole);
-        con.WriteLine();
+        systemConsole.Out.WriteLine();
+        systemConsole.Out.WriteLine();
 
         if (_inner is IProvideUserArguments argProvider)
         {

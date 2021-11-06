@@ -26,7 +26,7 @@ public class TestGenerator : DelegateGenerator<TestGenerator.Arguments>
     {
         profiles.Add(new ProfileData(
             Name: NotNullOrThrow(args.ProfileName),
-            CommandLine: $"echo {args.Greeting.FormatParameter()}",
+            CommandLine: $"echo {args.Greeting.Format()}",
             StartingDirectory: args.StartingDirectory.WrapOpt(),
             TabTitle: args.ProfileTitle.WrapOpt(whitespaceIsNone: true),
             Icon: Opt<Icon>.None));

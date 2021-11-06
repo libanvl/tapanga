@@ -8,7 +8,7 @@ public abstract class DelegateGenerator<T> : DelegateGeneratorBase<T, int>
     {
         if (value is null)
         {
-            throw new ArgumentException();
+            throw new ArgumentException($"An expected value was not provided");
         }
 
         return value;
