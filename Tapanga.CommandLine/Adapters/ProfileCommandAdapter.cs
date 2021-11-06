@@ -2,7 +2,6 @@
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.CommandLine.Rendering;
-using System.CommandLine.Rendering.Views;
 using Tapanga.Core;
 
 namespace Tapanga.CommandLine;
@@ -28,13 +27,14 @@ internal class ProfileCommandAdapter
         Description = "List all profiles created from the loaded plugins"
     };
 
-    private int ListHandler(SystemConsole console)
+    public int ListHandler(SystemConsole console)
     {
         var terminal = console.GetTerminal();
         var renderer = new ConsoleRenderer(terminal);
         var view = new ProfileDataExItemsView(_profileManager.GetProfiles());
         terminal.Clear();
         view.Render(renderer, Region.Scrolling);
+        console.Out.WriteLine();
         return 0;
     }
 
@@ -50,8 +50,20 @@ internal class ProfileCommandAdapter
         return command;
     }
 
-    private int RemoveHandler(string id)
+    private int RemoveHandler(ColorConsole console, string id)
     {
-        return (int)_profileManager.RemoveProfile(id);
+        var result = _profileManager.RemoveProfile(id);
+        var msg = result switch
+        {
+            ProfileManager.RemoveProfileResult.OK => $"OK: {id} removed",
+            ProfileManager.RemoveProfileResult.NoMatchingProfile => $"No known profiles matched {id}",
+            ProfileManager.RemoveProfileResult.MultipleProfiles => $"Multiple profiles matched {id}. Try using a longer prefix.",
+            ProfileManager.RemoveProfileResult.DataLoadError => $"Tapanga failed to load profile data. Check that plugins are available at the expected path.",
+            ProfileManager.RemoveProfileResult.Failed => $"Failed: {id} could not be removed.",
+            _ => "Unknown error."
+        };
+
+        console.GreenLine(msg);
+        return (int)result;
     }
 }

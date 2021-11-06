@@ -12,15 +12,9 @@ internal class Program
     internal const string RootDescription = "TaPaN-Ga: Terminal Profile N-Generator";
 
     private static readonly Option<IEnumerable<DirectoryInfo>> PluginPathOption =
-        new Option<IEnumerable<DirectoryInfo>>(
-            "--plugin-path",
-            description: "Directory to search for plugin assemblies. Accepts mutiple options.",
-            getDefaultValue: () => new[]
-            { 
-                new DirectoryInfo(AppContext.BaseDirectory)
-            }
-        )
+        new Option<IEnumerable<DirectoryInfo>>("--plugin-path", getDefaultValue: () => new[] { new DirectoryInfo(AppContext.BaseDirectory) })
         {
+            Description = "Directory to search for plugin assemblies. Accepts mutiple options.",
             AllowMultipleArgumentsPerToken = true,
             Arity = ArgumentArity.ExactlyOne,
         }
@@ -34,7 +28,8 @@ internal class Program
         try
         {
             ParseResult parseResult = new Parser(PluginPathOption).Parse(args);
-            IEnumerable<DirectoryInfo>? pluginPaths = parseResult.ValueForOption(PluginPathOption)?
+            IEnumerable<DirectoryInfo>? pluginPaths = parseResult
+                .ValueForOption(PluginPathOption)?
                 .Where(di => di.Exists);
 
             var gm = new GeneratorManager(pluginPaths.WrapOpt(emptyIsNone: true));
@@ -44,8 +39,6 @@ internal class Program
 
             int ret = await BuildCommandLine(gm, pm, newProfilesMap)
                 .UseDefaults()
-                .EnableDirectives()
-                .ConfigureConsole(bc => new SystemConsole())
                 .BuildServiceMiddleware(console)
                 .Build()
                 .InvokeAsync(args);
@@ -55,26 +48,15 @@ internal class Program
                 return ret;
             }
 
+            pm.AddProfileData(newProfilesMap);
+
             if (parseResult.Directives.Contains("dry-run"))
             {
+                new ProfileCommandAdapter(pm).ListHandler(new SystemConsole());
                 console.MagentaLine("Running in Dry Run mode");
-                foreach (var (generatorId, profiles) in newProfilesMap)
-                {
-                    console.CyanLine(generatorId, ConsoleColor.DarkBlue);
-
-                    foreach (var p in profiles)
-                    {
-                        console.GrayLine(p, ConsoleColor.DarkBlue);
-                    }
-                }
             }
             else
             {
-                foreach (var (generatorId, profiles) in newProfilesMap)
-                {
-                    pm.AddProfileData(generatorId, profiles);
-                }
-
                 return pm.Write() ? 0 : -1;
             }
 

@@ -13,11 +13,23 @@ internal class ProfileDataExCollection : ICollection<ProfileDataEx>
 
     public void Add(ProfileDataEx item) => _inner.Add(item);
 
-    public void Add(GeneratorId generatorId, ProfileData profile) => 
-        _inner.Add(new ProfileDataEx(generatorId, profile));
+    public void Add(GeneratorId generatorId, ProfileData profile)
+    {
+        if (_inner.Any(pd => pd.Name == profile.Name))
+        {
+            profile = profile with { Name = $"{profile.Name} {Utilities.GetShortRandomId(bytes: 3)}" };
+        }
 
-    public void AddRange(GeneratorId generatorId, IEnumerable<ProfileData> profiles) =>
-        _inner.AddRange(profiles.Select(pd => new ProfileDataEx(generatorId, pd)));
+        _inner.Add(new ProfileDataEx(generatorId, profile));
+    }
+
+    public void AddRange(GeneratorId generatorId, IEnumerable<ProfileData> profiles)
+    {
+        foreach (var profile in profiles)
+        {
+            Add(generatorId, profile);
+        }
+    }
 
     public void Clear() => _inner.Clear();
 

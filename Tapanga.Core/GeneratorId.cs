@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Tapanga.Core;
+﻿namespace Tapanga.Core;
 
 public record GeneratorId
 {

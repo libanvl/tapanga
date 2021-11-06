@@ -5,25 +5,17 @@ namespace Tapanga.Core;
 
 public class ProfileDataCollection : IReadOnlyList<ProfileData>, IProfileDataCollection
 {
-    private readonly List<ProfileData> inner = new();
+    private readonly List<ProfileData> _inner = new();
 
-    public ProfileData this[int index] => ((IReadOnlyList<ProfileData>)inner)[index];
+    public ProfileData this[int index] => ((IReadOnlyList<ProfileData>)_inner)[index];
 
-    public int Count => inner.Count;
+    public int Count => _inner.Count;
 
-    public void Add(ProfileData item)
-    {
-        if (inner.Any(pd => pd.Name == item.Name))
-        {
-            item = item with { Name = $"{item.Name} {Utilities.GetShortRandomId(bytes: 3)}" };
-        }
+    public void Add(ProfileData item) => _inner.Add(item);
 
-        inner.Add(item);
-    }
+    public bool Contains(ProfileData item) => _inner.Contains(item);
 
-    public bool Contains(ProfileData item) => inner.Contains(item);
+    public IEnumerator<ProfileData> GetEnumerator() => _inner.GetEnumerator();
 
-    public IEnumerator<ProfileData> GetEnumerator() => inner.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => inner.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => _inner.GetEnumerator();
 }
