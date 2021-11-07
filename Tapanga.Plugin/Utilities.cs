@@ -1,5 +1,8 @@
 ﻿namespace Tapanga;
 
+/// <summary>
+/// Tapanga Plugin Utilities
+/// </summary>
 public static class Utilities
 {
     /// <summary>
