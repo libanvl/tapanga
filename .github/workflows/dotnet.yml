@@ -13,9 +13,6 @@ env:
   GITHUB_FEED: https://nuget.pkg.github.com/libanvl/index.json
   GITHUB_USER: libanvl
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-# Official NuGet Feed settings
-  NUGET_FEED: https://api.nuget.org/v3/index.json
-  NUGET_TOKEN: ${{ secrets.NUGET_PUSH_KEY }}
 
 jobs:
   build:
