@@ -14,7 +14,7 @@ env:
   NUGET_TOKEN: ${{ secrets.NUGET_PUSH_KEY }}
 
 jobs:
-  deploy:
+  build:
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -35,12 +35,24 @@ jobs:
         run: dotnet restore
       - name: Cloud Build Version
         run: nbgv cloud
-      - name: Build
-        run: dotnet build --configuration Release --no-restore -p:ContinuousIntegrationBuild=true 
       - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal
-      - name: Create Release NuGet package
-        run: dotnet pack --configuration Release --no-restore --no-build --include-symbols --include-source --output nupkg -p:PublicRelease=true -p:SymbolPackageFormat=snupkg
+        run: dotnet test --configuration Release --no-restore --verbosity normal
+      - name: Pack
+        run: dotnet pack --configuration Release --no-restore --include-symbols --include-source --output nupkg  -p:SymbolPackageFormat=snupkg -p:ContinuousIntegrationBuild=true -p:PublicRelease=true
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: nupkg
+          path: ./nupkg/*.*nupkg
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: nupkg
       - name: Push to GitHub Feed
         run: dotnet nuget push ./nupkg/*.*nupkg --source ${GITHUB_FEED} --api-key ${GITHUB_TOKEN}
       - name: Push to NuGet Feed
