@@ -59,4 +59,3 @@ jobs:
           name: nupkg
       - name: Push to GitHub Feed
         run: dotnet nuget push ./nupkg/*.nupkg --source ${GITHUB_FEED} --api-key ${GITHUB_TOKEN}
-
