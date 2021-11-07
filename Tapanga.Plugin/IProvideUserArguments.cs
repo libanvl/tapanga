@@ -8,6 +8,9 @@ namespace Tapanga.Plugin;
 /// </summary>
 public interface IProvideUserArguments
 {
+    /// <summary>
+    /// Gets the user arguments for the generator.
+    /// </summary>
     public IReadOnlyList<UserArgument> GetUserArguments();
 }
 
@@ -31,7 +34,6 @@ public abstract record UserArgument(
     int Sort);
 
 /// <inheritdoc/>
-/// <param name="Default">An optional default value.</param>
 public record UserArgument<T>(
     string LongName,
     Opt<string> ShortName,
