@@ -8,11 +8,11 @@ namespace Tapanga.CommandLine;
 
 internal class ProfileCommandAdapter
 {
-    private readonly ProfileManager _profileManager;
+    private readonly SerializationManager _serializationManager;
 
-    public ProfileCommandAdapter(ProfileManager profileManager)
+    public ProfileCommandAdapter(SerializationManager serializationManager)
     {
-        _profileManager = profileManager;
+        _serializationManager = serializationManager;
     }
 
     public Command GetCommand() => new("profile", "Manage the generated profiles")
@@ -29,13 +29,18 @@ internal class ProfileCommandAdapter
 
     public int ListHandler(SystemConsole console)
     {
-        var terminal = console.GetTerminal();
-        var renderer = new ConsoleRenderer(terminal);
-        var view = new ProfileDataExItemsView(_profileManager.GetProfiles());
-        terminal.Clear();
-        view.Render(renderer, Region.Scrolling);
-        console.Out.WriteLine();
-        return 0;
+        if (_serializationManager.TryLoad(out var profiles))
+        {
+            var terminal = console.GetTerminal();
+            var renderer = new ConsoleRenderer(terminal);
+            var view = new ProfileDataExItemsView(profiles);
+            terminal.Clear();
+            view.Render(renderer, Region.Scrolling);
+            console.Out.WriteLine();
+            return 0;
+        }
+
+        return -1;
     }
 
     private Command GetRemoveCommand()
@@ -52,14 +57,14 @@ internal class ProfileCommandAdapter
 
     private int RemoveHandler(ColorConsole console, string id)
     {
-        var result = _profileManager.RemoveProfile(id);
+        var result = _serializationManager.RemoveProfile(id);
         var msg = result switch
         {
-            ProfileManager.RemoveProfileResult.OK => $"OK: {id} removed",
-            ProfileManager.RemoveProfileResult.NoMatchingProfile => $"No known profiles matched {id}",
-            ProfileManager.RemoveProfileResult.MultipleProfiles => $"Multiple profiles matched {id}. Try using a longer prefix.",
-            ProfileManager.RemoveProfileResult.DataLoadError => $"Tapanga failed to load profile data. Check that plugins are available at the expected path.",
-            ProfileManager.RemoveProfileResult.Failed => $"Failed: {id} could not be removed.",
+            SerializationManager.RemoveProfileResult.OK => $"OK: {id} removed",
+            SerializationManager.RemoveProfileResult.NoMatchingProfile => $"No known profiles matched {id}",
+            SerializationManager.RemoveProfileResult.MultipleProfiles => $"Multiple profiles matched {id}. Try using a longer prefix.",
+            SerializationManager.RemoveProfileResult.DataLoadError => $"Tapanga failed to load profile data. Check that plugins are available at the expected path.",
+            SerializationManager.RemoveProfileResult.Failed => $"Failed: {id} could not be removed.",
             _ => "Unknown error."
         };
 

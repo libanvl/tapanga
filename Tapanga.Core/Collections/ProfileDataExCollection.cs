@@ -3,9 +3,11 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-internal class ProfileDataExCollection : ICollection<ProfileDataEx>
+public class ProfileDataExCollection : ICollection<ProfileDataEx>
 {
     private readonly List<ProfileDataEx> _inner = new();
+
+    public static ProfileDataExCollection Empty { get; } = new ProfileDataExCollection();
 
     public int Count => _inner.Count;
 

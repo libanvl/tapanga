@@ -5,14 +5,14 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-public class ProfileManager
+public class SerializationManager
 {
     private readonly IEnumerable<IProfileGeneratorAdapter> _generators;
     private readonly Dictionary<GeneratorId, bool> _isDirtyMap;
 
     private Opt<ProfileDataExCollection> _cachedProfileData = Opt<ProfileDataExCollection>.None;
 
-    public ProfileManager(GeneratorManager generatorManager)
+    public SerializationManager(GeneratorManager generatorManager)
     {
         _generators = generatorManager.GetProfileGenerators();
         _isDirtyMap = _generators
@@ -28,40 +28,43 @@ public class ProfileManager
         Failed,
     }
 
-    public bool Load()
+    public bool TryLoad(out ProfileDataExCollection profiles)
     {
         if (_cachedProfileData.IsNone)
         {
-            var data = new ProfileDataExCollection();
-
-            foreach (var gen in _generators)
+            try
             {
-                var optFragmentRoot = GeneratorReaderWriter
-                    .Factory(gen.GeneratorId)
-                    .Read();
+                var data = new ProfileDataExCollection();
 
-                if (optFragmentRoot is Opt<FragmentRoot>.Some someFragmentRoot)
+                foreach (var gen in _generators)
                 {
-                    data.AddRange(
-                        gen.GeneratorId,
-                        someFragmentRoot.Value.Profiles.Select(p => GetProfileData(p)));
+                    var optFragmentRoot = GeneratorReaderWriter
+                        .Factory(gen.GeneratorId)
+                        .Read();
+
+                    if (optFragmentRoot is Opt<FragmentRoot>.Some someFragmentRoot)
+                    {
+                        data.AddRange(
+                            gen.GeneratorId,
+                            someFragmentRoot.Value.Profiles.Select(p => GetProfileData(p)));
+                    }
+                    else
+                    {
+                        // TODO log no profiles
+                    }
                 }
-                else
-                {
-                    // TODO log no profiles
-                }
+
+                _cachedProfileData = data.WrapOpt();
             }
-
-            _cachedProfileData = data.WrapOpt();
+            catch
+            {
+                profiles = ProfileDataExCollection.Empty;
+                return false;
+            }
         }
 
+        profiles = _cachedProfileData.Unwrap();
         return true;
-    }
-
-    public IEnumerable<ProfileDataEx> GetProfiles()
-    {
-        Load();
-        return _cachedProfileData.SomeOrEmpty();
     }
 
     public bool Write(bool force = false)
@@ -106,14 +109,14 @@ public class ProfileManager
 
     public bool AddProfileData(GeneratorId generatorId, ProfileDataCollection profiles)
     {
-        if (Load() && _cachedProfileData is Opt<ProfileDataExCollection>.Some someCollection)
+        if (TryLoad(out var result))
         {
             if (profiles.Any())
             {
                 Assumes.True(_isDirtyMap.ContainsKey(generatorId));
 
                 _isDirtyMap[generatorId] = true;
-                someCollection.Value.AddRange(generatorId, profiles);
+                result.AddRange(generatorId, profiles);
             }
 
             return true;
@@ -124,9 +127,8 @@ public class ProfileManager
 
     public RemoveProfileResult RemoveProfile(string shortId)
     {
-        if (Load() && _cachedProfileData is Opt<ProfileDataExCollection>.Some someCollection)
+        if (TryLoad(out var collection))
         {
-            var collection = someCollection.Value;
             var matchingProfiles = collection
                 .Where(pdx => pdx.ProfileId.ToString().StartsWith(shortId));
 

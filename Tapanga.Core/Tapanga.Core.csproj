@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="libanvl.uuid" Version="1.6.8-beta" />
     <PackageReference Include="Microsoft.VisualStudio.Validation" Version="17.0.34" />
   </ItemGroup>
 

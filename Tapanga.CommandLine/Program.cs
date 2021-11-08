@@ -33,7 +33,7 @@ internal class Program
                 .Where(di => di.Exists);
 
             var gm = new GeneratorManager(pluginPaths.WrapOpt(emptyIsNone: true));
-            var pm = new ProfileManager(gm);
+            var pm = new SerializationManager(gm);
 
             var newProfilesMap = new ProfileDataCollectionMap();
 
@@ -73,7 +73,7 @@ internal class Program
         }
     }
 
-    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, ProfileManager pm, ProfileDataCollectionMap newProfilesMap)
+    private static CommandLineBuilder BuildCommandLine(GeneratorManager gm, SerializationManager pm, ProfileDataCollectionMap newProfilesMap)
     {
         var rootCommand = new RootCommand(RootDescription)
         {
