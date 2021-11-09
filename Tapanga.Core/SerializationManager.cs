@@ -155,6 +155,37 @@ public class SerializationManager
         return RemoveProfileResult.DataLoadError;
     }
 
+    public IEnumerable<RemoveProfileResult> RemoveGeneratorProfiles(string generatorKey)
+    {
+        if (TryLoad(out var collection))
+        {
+            var matchingProfiles = collection
+                .Where(pdx => pdx.GeneratorId.Key.Equals(generatorKey, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            if (!matchingProfiles.Any())
+            {
+                return new[] { RemoveProfileResult.NoMatchingProfile };
+            }
+
+
+            var results = new List<RemoveProfileResult>();
+            foreach (var profile in matchingProfiles)
+            {
+                Assumes.True(_isDirtyMap.ContainsKey(profile.GeneratorId));
+                _isDirtyMap[profile.GeneratorId] = true;
+
+                results.Add(collection.Remove(profile)
+                    ? RemoveProfileResult.OK
+                    : RemoveProfileResult.Failed);
+            }
+
+            return results;
+        }
+
+        return new[] { RemoveProfileResult.DataLoadError };
+    }
+
     private static ProfileData GetProfileData(Profile profile)
     {
         return new ProfileData(

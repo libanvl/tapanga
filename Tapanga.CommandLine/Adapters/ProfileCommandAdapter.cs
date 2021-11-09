@@ -18,7 +18,8 @@ internal class ProfileCommandAdapter
     public Command GetCommand() => new("profile", "Manage the generated profiles")
     {
         GetListCommand().WithAlias("ls"),
-        GetRemoveCommand().WithAlias("rm")
+        GetRemoveCommand().WithAlias("rm"),
+        GetClearGeneratorCommand()
     };
 
     private Command GetListCommand() => new("list")
@@ -70,5 +71,30 @@ internal class ProfileCommandAdapter
 
         console.GreenLine(msg);
         return (int)result;
+    }
+
+    private Command GetClearGeneratorCommand()
+    {
+        Command command = new("clear-generator-profiles")
+        {
+            new Argument<string>("key", "the key of the generator profiles to be removed")
+        };
+
+        command.Handler = CommandHandler.Create(ClearGeneratorHandler);
+
+        return command;
+    }
+
+    private int ClearGeneratorHandler(ColorConsole console, string key)
+    {
+        var results = _serializationManager.RemoveGeneratorProfiles(key);
+        if (results.All(r => r == SerializationManager.RemoveProfileResult.OK))
+        {
+            console.GreenLine($"OK: {results.Count()} profiles removed");
+            return 0;
+        }
+
+        console.MagentaLine("Errors encountered.");
+        return -1;
     }
 }
