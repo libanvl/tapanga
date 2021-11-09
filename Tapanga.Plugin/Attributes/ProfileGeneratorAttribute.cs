@@ -31,4 +31,9 @@ public class ProfileGeneratorAttribute : Attribute
     /// The version of the generator.
     /// </summary>
     public Version Version { get; }
+
+    /// <summary>
+    /// Whether the generator is enabled for use.
+    /// </summary>
+    public bool IsEnabled { get; set; } = true;
 }
