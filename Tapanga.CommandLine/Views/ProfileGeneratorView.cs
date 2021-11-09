@@ -2,7 +2,6 @@
 using System.CommandLine.Rendering;
 using System.CommandLine.Rendering.Views;
 using Tapanga.Core;
-using Tapanga.Plugin;
 
 namespace Tapanga.CommandLine;
 
@@ -10,27 +9,31 @@ internal class ProfileGeneratorView : StackLayoutView
 {
     public ProfileGeneratorView(IProfileGeneratorAdapter generator)
     {
-        var uaTableView = new TableView<UserArgument>();
-        uaTableView.Items = generator.GetUserArguments();
+        var oaTableView = new TableView<OptionAdapter>
+        {
+            Items = generator.GetUserArguments()
+                .Select(ua => new OptionAdapter(ua))
+                .ToList()
+        };
 
-        uaTableView.AddColumn(
-            cellValue: ua => ua.LongName.LightGreen(),
+        oaTableView.AddColumn(
+            cellValue: oa => oa.LongName.LightGreen(),
             header: new ContentView("Long Name".Underline()));
 
-        uaTableView.AddColumn(
-            cellValue: ua => ua.ShortName.SomeOrDefault("None").White(),
+        oaTableView.AddColumn(
+            cellValue: oa => oa.ShortName.SomeOrDefault("None").White(),
             header: new ContentView("Short Name".Underline()));
 
-        uaTableView.AddColumn(
-            cellValue: ua => ua.Required ? "*".White() : "".White(),
+        oaTableView.AddColumn(
+            cellValue: oa => oa.IsRequired ? "*".White() : "".White(),
             header: new ContentView("Required".Underline()));
 
-        uaTableView.AddColumn(
-            cellValue: ua => ua.Description.White(),
+        oaTableView.AddColumn(
+            cellValue: oa => oa.Description?.White() ?? "None".White(),
             header: new ContentView("Description".Underline()));
 
-        uaTableView.AddColumn(
-            cellValue: ua => Span(ua.DefaultObject ?? "None".White()),
+        oaTableView.AddColumn(
+            cellValue: oa => oa.GetDefaultValuesString().White(),
             header: new ContentView("Default".Underline()));
 
         Add(new GeneratorIdView(generator.GeneratorId));
@@ -40,13 +43,10 @@ internal class ProfileGeneratorView : StackLayoutView
         Add(Span(Environment.NewLine).AsView());
 
         Add("Arguments".Green().Reverse().AsView());
-        Add(uaTableView);
+        Add(oaTableView);
     }
 
-    private TextSpan Span(object obj)
-    {
-        return Formatter.Format(obj);
-    }
+    private TextSpan Span(object obj) => Formatter.Format(obj);
 
     protected TextSpanFormatter Formatter { get; } = new TextSpanFormatter();
 }

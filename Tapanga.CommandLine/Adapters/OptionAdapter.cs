@@ -30,6 +30,8 @@ internal class OptionAdapter : IOption
 
     public string LongName => _userArgument.LongName;
 
+    public Opt<string> ShortName => _userArgument.ShortName;
+
     public IArgument Argument => ((IOption)_option).Argument;
 
     public bool IsRequired => _option.IsRequired;
@@ -91,7 +93,12 @@ internal class OptionAdapter : IOption
 
     public Opt<object> GetDefaultValue()
     {
-        return ((IValueDescriptor)_option).GetDefaultValue().WrapOpt();
+        if (HasDefaultValue)
+        {
+            return ((IValueDescriptor)_option).GetDefaultValue().WrapOpt();
+        }
+
+        return Opt<object>.None;
     }
 
     public IEnumerable<string> GetSuggestions(ParseResult? parseResult = null, string? textToMatch = null)
