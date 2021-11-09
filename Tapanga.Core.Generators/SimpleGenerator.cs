@@ -4,7 +4,7 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core.Generators;
 
-[ProfileGenerator("core.simple", "0.1")]
+[ProfileGenerator("core.simple", "0.1", IsEnabled = false)]
 [Description("Generates simple greeter profile.")]
 public class SimpleGenerator : IProfileGenerator, IProvideUserArguments
 {
