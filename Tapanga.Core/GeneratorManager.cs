@@ -51,7 +51,7 @@ public class GeneratorManager
         return loadContext.LoadFromAssemblyPath(absolutePath);
     }
 
-    private IEnumerable<IProfileGeneratorAdapter> CreateGenerators(Assembly assembly)
+    private static IEnumerable<IProfileGeneratorAdapter> CreateGenerators(Assembly assembly)
     {
         if (assembly.GetCustomAttribute<PluginAssemblyAttribute>() is null)
         {
@@ -62,24 +62,33 @@ public class GeneratorManager
 
         foreach (Type type in assembly.GetExportedTypes())
         {
-            if (typeof(IDelegateProfileGenerator).IsAssignableFrom(type))
+            if (type.GetCustomAttribute<ProfileGeneratorAttribute>() is ProfileGeneratorAttribute pgattr)
             {
-                var result = Activator.CreateInstance(type) as IDelegateProfileGenerator;
-                if (result is IDelegateProfileGenerator generator)
+                if (!pgattr.IsEnabled)
                 {
-                    count++;
-                    yield return new DelegateGeneratorAdapter(generator);
                     continue;
                 }
-            }
 
-            if (typeof(IProfileGenerator).IsAssignableFrom(type))
-            {
-                var result = Activator.CreateInstance(type) as IProfileGenerator;
-                if (result is IProfileGenerator generator)
+                if (typeof(IDelegateProfileGenerator).IsAssignableFrom(type))
                 {
-                    count++;
-                    yield return new ProfileGeneratorAdapter(generator);
+
+                    var result = Activator.CreateInstance(type) as IDelegateProfileGenerator;
+                    if (result is IDelegateProfileGenerator generator)
+                    {
+                        count++;
+                        yield return new DelegateGeneratorAdapter(generator);
+                        continue;
+                    }
+                }
+
+                if (typeof(IProfileGenerator).IsAssignableFrom(type))
+                {
+                    var result = Activator.CreateInstance(type) as IProfileGenerator;
+                    if (result is IProfileGenerator generator)
+                    {
+                        count++;
+                        yield return new ProfileGeneratorAdapter(generator);
+                    }
                 }
             }
         }

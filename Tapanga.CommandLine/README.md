@@ -21,7 +21,7 @@ default, called `core.ssh`.
 c:\dotnet-tools\tapanga.exe gen core.ssh go
 ```
 
-Install other plugin assemblies in the same path as tapanga.exe, or provide the path to the
+Install other plugin assemblies in the same path as tapanga.commandline.dll, or provide the path to the
 directory with the plugin assemblies:
 
 ```
@@ -29,6 +29,7 @@ c:\dotnet-tools\tapanga.exe -pp \path\to\plugins\ gen <plugin.generator> go
 ```
 
 ```
+PS C:\dotnet-tools> .\tapanga.exe --help
 Tapanga.CommandLine
   TaPaN-Ga: Terminal Profile N-Generator
 
@@ -37,7 +38,8 @@ Usage:
 
 Options:
   -pp, --plugin-path <plugin-path>  Directory to search for plugin assemblies. Accepts mutiple options. [default:
-                                    C:\Users\***REMOVED***\source\repos\Tapanga\Tapanga.CommandLine\bin\Debug\net6.0\]
+                                    C:\dotnet-tools\.store\tapanga.commandline\1.2.4-beta\tapanga.commandline\1.2.4-beta
+                                    \tools\net6.0\any\]
   --version                         Show version information
   -?, -h, --help                    Show help and usage information
 

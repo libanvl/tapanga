@@ -4,7 +4,7 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core.Generators;
 
-[ProfileGenerator("core.demo", "0.1")]
+[ProfileGenerator("core.demo", "0.1", IsEnabled = false)]
 [Description("A generator used for demonstrating delegate generator features.")]
 public class TestGenerator : DelegateGenerator<TestGenerator.Arguments>
 {
