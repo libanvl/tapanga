@@ -1,8 +1,11 @@
 name: NuGet Release
+
 on:
   release:
     types:
       - published
+  workflow_dispatch:
+
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 # GitHub Packages Feed settings
@@ -14,46 +17,19 @@ env:
   NUGET_TOKEN: ${{ secrets.NUGET_PUSH_KEY }}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
-          include-prerelease: true
-      - name: Nerdbank.GitVersioning
-        uses: dotnet/nbgv@v0.4.0
-        with:
-          setCommonVars: true
-        id: nbgv
-      - name: Restore
-        run: dotnet restore
-      - name: Cloud Build Version
-        run: nbgv cloud
-      - name: Test
-        run: dotnet test --configuration Release --no-restore --verbosity normal
-      - name: Pack
-        run: dotnet pack --configuration Release --no-restore --include-symbols --include-source --output nupkg  -p:SymbolPackageFormat=snupkg -p:ContinuousIntegrationBuild=true -p:PublicRelease=true
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: nupkg
-          path: ./nupkg/*.*nupkg
-
   release:
-    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v1
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: dotnet.yml
+          commit: ${{ env.GITHUB_SHA }}
           name: nupkg
+          path: nupkg
+          check_artifacts: true
+
       - name: Push to GitHub Feed
-        run: dotnet nuget push ./nupkg/*.*nupkg --source ${GITHUB_FEED} --api-key ${GITHUB_TOKEN}
+        run: dotnet nuget push ./nupkg/*.nupkg --source ${GITHUB_FEED} --skip-duplicate --api-key ${GITHUB_TOKEN}
       - name: Push to NuGet Feed
         run: dotnet nuget push ./nupkg/*.nupkg --source ${NUGET_FEED} --skip-duplicate --api-key ${NUGET_TOKEN}
