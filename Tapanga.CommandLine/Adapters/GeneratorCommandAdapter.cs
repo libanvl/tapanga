@@ -36,7 +36,7 @@ internal class GeneratorCommandAdapter
     {
         var terminal = console.GetTerminal();
         terminal.Clear();
-        var view = new ProfileGeneratorView(_inner);
+        var view = new GeneratorView(_inner);
         view.Render(new ConsoleRenderer(terminal, resetAfterRender: true), Region.Scrolling);
     }
 
@@ -90,7 +90,12 @@ internal class GeneratorCommandAdapter
         {
             foreach (var opt in argProvider.GetUserArguments().Select(arg => new OptionAdapter(arg)))
             {
-                con.GreenLine($"{opt.Description} ({opt.BoundType.Name})");
+                con.GrayLine($"{opt.Description} ({opt.BoundType.Name})");
+
+                if (opt.Arity.MaximumNumberOfValues > 1)
+                {
+                    con.MagentaLine($">> Seperate multiple inputs with space <<");
+                }
 
                 string response = string.Empty;
                 while (true)
