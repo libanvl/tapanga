@@ -40,6 +40,14 @@ internal class GeneratorView : StackLayoutView
             cellValue: oa => oa.GetDefaultValuesString().White(),
             header: new ContentView("Default".Underline()));
 
+        oaTableView.AddColumn(
+            cellValue: oa => oa.BoundType.Name.White(),
+            header: new ContentView("Type".Underline()));
+
+        oaTableView.AddColumn(
+            cellValue: oa => GetEnumValuesSpan(oa.BoundType),
+            header: new ContentView("Enum".Underline()));
+
         Add(new GeneratorIdView(generator.GeneratorId));
         Add(SpanNewLine);
 
@@ -58,6 +66,16 @@ internal class GeneratorView : StackLayoutView
     private TextSpan Span(object obj) => Formatter.Format(obj);
 
     private View SpanNewLine => Span(Environment.NewLine).AsView();
+
+    private TextSpan GetEnumValuesSpan(Type type)
+    {
+        if (type.IsEnum)
+        {
+            return string.Join(' ', Enum.GetNames(type)).White();
+        }
+
+        return Span(string.Empty);
+    }
 
     protected TextSpanFormatter Formatter { get; } = new TextSpanFormatter();
 }
