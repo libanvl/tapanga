@@ -137,8 +137,8 @@ internal class GeneratorCommandAdapter
 
         if (result == 0)
         {
-            con.GreenLine(">> Success!");
-            con.GreenLine(">> Restart Windows Terminal for changes to take effect.");
+            con.CyanLine(">> Success!");
+            con.CyanLine(">> Restart Windows Terminal for changes to take effect.");
         }
 
         return result;
