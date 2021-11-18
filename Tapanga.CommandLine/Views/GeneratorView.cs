@@ -5,9 +5,9 @@ using Tapanga.Core;
 
 namespace Tapanga.CommandLine;
 
-internal class ProfileGeneratorView : StackLayoutView
+internal class GeneratorView : StackLayoutView
 {
-    public ProfileGeneratorView(IProfileGeneratorAdapter generator)
+    public GeneratorView(IProfileGeneratorAdapter generator)
     {
         var oaTableView = new TableView<OptionAdapter>
         {
@@ -21,12 +21,16 @@ internal class ProfileGeneratorView : StackLayoutView
             header: new ContentView("Long Name".Underline()));
 
         oaTableView.AddColumn(
-            cellValue: oa => oa.ShortName.SomeOrDefault("None").White(),
-            header: new ContentView("Short Name".Underline()));
+            cellValue: oa => oa.ShortName.SomeOrDefault(string.Empty).White(),
+            header: new ContentView("Alias".Underline()));
 
         oaTableView.AddColumn(
             cellValue: oa => oa.IsRequired ? "*".White() : "".White(),
-            header: new ContentView("Required".Underline()));
+            header: new ContentView("*".Underline()));
+
+        oaTableView.AddColumn(
+            cellValue: oa => (oa.Arity.MaximumNumberOfValues > 1 ? "+" : string.Empty).White(),
+            header: new ContentView("+".Underline()));
 
         oaTableView.AddColumn(
             cellValue: oa => oa.Description?.White() ?? "None".White(),
@@ -37,19 +41,23 @@ internal class ProfileGeneratorView : StackLayoutView
             header: new ContentView("Default".Underline()));
 
         Add(new GeneratorIdView(generator.GeneratorId));
-        Add(Span(Environment.NewLine).AsView());
+        Add(SpanNewLine);
 
         Add(generator.Description.ToString().Yellow().AsView());
-        Add(Span(Environment.NewLine).AsView());
+        Add(SpanNewLine);
 
         Add(generator.GeneratorInfo.ToString().White().AsView());
-        Add(Span(Environment.NewLine).AsView());
+        Add(SpanNewLine);
 
         Add("Arguments".Green().Reverse().AsView());
         Add(oaTableView);
+        Add(SpanNewLine);
+        Add("*=Required  +=Accepts Multiple".White().AsView());
     }
 
     private TextSpan Span(object obj) => Formatter.Format(obj);
+
+    private View SpanNewLine => Span(Environment.NewLine).AsView();
 
     protected TextSpanFormatter Formatter { get; } = new TextSpanFormatter();
 }
