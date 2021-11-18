@@ -45,14 +45,28 @@ public class GeneratorManager
         return Assumes.NotReachable<ProfileGenerators>();
     }
 
-    private static Assembly LoadPlugin(string absolutePath)
+    private static Opt<Assembly> LoadPlugin(string absolutePath)
     {
-        PluginLoadContext loadContext = new(absolutePath);
-        return loadContext.LoadFromAssemblyPath(absolutePath);
+        try
+        {
+            PluginLoadContext loadContext = new(absolutePath);
+            return loadContext.LoadFromAssemblyPath(absolutePath);
+        }
+        catch
+        {
+            return Opt<Assembly>.None;
+        }
     }
 
-    private static IEnumerable<IProfileGeneratorAdapter> CreateGenerators(Assembly assembly)
+    private static IEnumerable<IProfileGeneratorAdapter> CreateGenerators(Opt<Assembly> optAssembly)
     {
+        if (optAssembly.IsNone)
+        {
+            yield break;
+        }
+
+        Assembly assembly = optAssembly.Unwrap();
+
         if (assembly.GetCustomAttribute<PluginAssemblyAttribute>() is null)
         {
             yield break;
@@ -95,7 +109,7 @@ public class GeneratorManager
 
         if (count < 1)
         {
-            throw new InvalidOperationException($"No plugins found in Tapanga plugin assembly: {assembly.GetName().Name}");
+            throw new InvalidOperationException($"No generators found in Tapanga plugin assembly: {assembly.GetName().Name}");
         }
     }
 

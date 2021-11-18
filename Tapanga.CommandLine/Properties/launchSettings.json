@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Tapanga.CommandLine": {
+      "commandName": "Project",
+      "commandLineArgs": "-pp D:\\SteamLibrary gen"
+    }
+  }
+}
