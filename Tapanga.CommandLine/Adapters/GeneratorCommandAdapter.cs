@@ -95,7 +95,7 @@ internal class GeneratorCommandAdapter
                 string response = string.Empty;
                 while (true)
                 {
-                    WritePrompt(con, opt);
+                    WriteOptPrompt(con, opt);
 
                     response = Console.ReadLine() ?? string.Empty;
 
@@ -128,9 +128,17 @@ internal class GeneratorCommandAdapter
             }
         }
 
-        return command.Invoke(commandArgs.ToArray());
+        var result = command.Invoke(commandArgs.ToArray());
 
-        static void WritePrompt(ColorConsole con, OptionAdapter opt)
+        if (result == 0)
+        {
+            con.GreenLine(">> Success!");
+            con.GreenLine(">> Restart Windows Terminal for changes to take effect.");
+        }
+
+        return result;
+
+        static void WriteOptPrompt(ColorConsole con, OptionAdapter opt)
         {
             con.Cyan(opt.LongName);
 
