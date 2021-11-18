@@ -42,6 +42,9 @@ internal class ProfileGeneratorView : StackLayoutView
         Add(generator.Description.ToString().Yellow().AsView());
         Add(Span(Environment.NewLine).AsView());
 
+        Add(generator.GeneratorInfo.ToString().White().AsView());
+        Add(Span(Environment.NewLine).AsView());
+
         Add("Arguments".Green().Reverse().AsView());
         Add(oaTableView);
     }
