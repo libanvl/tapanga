@@ -30,13 +30,13 @@ jobs:
   build-windows:
     uses: libanvl/uuid/.github/workflows/ci-call.yml@main
     with:
-      runs-on: ubuntu-latest
+      runs-on: windows-latest
       dotnet-version: 6.0.x
       dotnet-include-prerelease: true
   build-macos:
     uses: libanvl/uuid/.github/workflows/ci-call.yml@main
     with:
-      runs-on: ubuntu-latest
+      runs-on: macos-latest
       dotnet-version: 6.0.x
       dotnet-include-prerelease: true
 

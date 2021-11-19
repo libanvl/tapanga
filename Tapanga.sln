@@ -7,14 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.Core", "Tapanga.Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.Plugin", "Tapanga.Plugin\Tapanga.Plugin.csproj", "{BD132F80-A70C-41D2-9C6F-C91509BC63BC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B5513F66-93EA-4B68-8FCC-9246F154A5CC}"
-	ProjectSection(SolutionItems) = preProject
-		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
-		README.md = README.md
-		.github\workflows\release.yml = .github\workflows\release.yml
-		version.json = version.json
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.Core.Generators", "Tapanga.Core.Generators\Tapanga.Core.Generators.csproj", "{0F60DE05-1882-4ECF-9CFA-BC8FE87E59BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.CommandLine", "Tapanga.CommandLine\Tapanga.CommandLine.csproj", "{21EE6185-E535-476E-B537-DBB444002C36}"
