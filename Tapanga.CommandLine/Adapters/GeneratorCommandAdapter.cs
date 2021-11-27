@@ -10,11 +10,13 @@ namespace Tapanga.CommandLine;
 
 internal class GeneratorCommandAdapter
 {
+    private readonly string _rootDescription;
     private readonly IProfileGeneratorAdapter _inner;
     private readonly ProfileDataCollection _profiles;
 
-    public GeneratorCommandAdapter(IProfileGeneratorAdapter profileGenerator, ProfileDataCollection profiles)
+    public GeneratorCommandAdapter(string rootDescription, IProfileGeneratorAdapter profileGenerator, ProfileDataCollection profiles)
     {
+        _rootDescription = rootDescription;
         _inner = profileGenerator;
         _profiles = profiles;
     }
@@ -78,7 +80,7 @@ internal class GeneratorCommandAdapter
 
         var commandArgs = new List<string>();
 
-        con.DarkBlue(Program.RootDescription, ConsoleColor.Gray);
+        con.DarkBlue(_rootDescription, ConsoleColor.Gray);
         con.WriteLine();
         con.RedLine("Ctrl-C to cancel");
 

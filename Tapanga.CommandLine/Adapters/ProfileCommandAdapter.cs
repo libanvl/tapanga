@@ -61,11 +61,11 @@ internal class ProfileCommandAdapter
         var result = _serializationManager.RemoveProfile(id);
         var msg = result switch
         {
-            SerializationManager.RemoveProfileResult.OK => $"OK: {id} removed",
-            SerializationManager.RemoveProfileResult.NoMatchingProfile => $"No known profiles matched {id}",
-            SerializationManager.RemoveProfileResult.MultipleProfiles => $"Multiple profiles matched {id}. Try using a longer prefix.",
-            SerializationManager.RemoveProfileResult.DataLoadError => $"Tapanga failed to load profile data. Check that plugins are available at the expected path.",
-            SerializationManager.RemoveProfileResult.Failed => $"Failed: {id} could not be removed.",
+            RemoveProfileResult.OK => $"OK: {id} removed",
+            RemoveProfileResult.NoMatchingProfile => $"No known profiles matched {id}",
+            RemoveProfileResult.MultipleProfiles => $"Multiple profiles matched {id}. Try using a longer prefix.",
+            RemoveProfileResult.DataLoadError => $"Tapanga failed to load profile data. Check that plugins are available at the expected path.",
+            RemoveProfileResult.Failed => $"Failed: {id} could not be removed.",
             _ => "Unknown error."
         };
 
@@ -88,7 +88,7 @@ internal class ProfileCommandAdapter
     private int ClearGeneratorHandler(ColorConsole console, string key)
     {
         var results = _serializationManager.RemoveGeneratorProfiles(key);
-        if (results.All(r => r == SerializationManager.RemoveProfileResult.OK))
+        if (results.All(r => r == RemoveProfileResult.OK))
         {
             console.GreenLine($"OK: {results.Count()} profiles removed");
             return 0;

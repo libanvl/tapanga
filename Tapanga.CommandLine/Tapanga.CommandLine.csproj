@@ -2,22 +2,17 @@
 
   <PropertyGroup>
     <AssemblyName>Tapanga.CommandLine</AssemblyName>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <PackAsTool>true</PackAsTool>
-    <ToolCommandName>tapanga</ToolCommandName>
     <Authors>libanvl</Authors>
     <Product>Tapanga</Product>
-    <Description>Tapanga command line tool.</Description>
+    <Description>Tapanga CommandLine Generator.</Description>
     <Copyright>The contributors and authors of the Tapanga project</Copyright>
     <RepositoryUrl>https://github.com/libanvl/tapanga</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
@@ -28,11 +23,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tapanga.Core.Generators\Tapanga.Core.Generators.csproj" />
     <ProjectReference Include="..\Tapanga.Core\Tapanga.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="_build\**">
+      <Pack>True</Pack>
+      <PackagePath>build\</PackagePath>
+    </None>
+    <None Remove="Program.cs.pp" />
+    <Content Include="Program.cs.pp" /> 
     <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>

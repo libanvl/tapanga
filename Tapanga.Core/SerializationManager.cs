@@ -5,27 +5,18 @@ using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-public class SerializationManager
+public class SerializationManager : ISerializationManager
 {
     private readonly IEnumerable<IProfileGeneratorAdapter> _generators;
     private readonly Dictionary<GeneratorId, bool> _isDirtyMap;
 
     private Opt<ProfileDataExCollection> _cachedProfileData = Opt<ProfileDataExCollection>.None;
 
-    public SerializationManager(GeneratorManager generatorManager)
+    public SerializationManager(IEnumerable<IProfileGeneratorAdapter> generators)
     {
-        _generators = generatorManager.GetProfileGenerators();
+        _generators = generators;
         _isDirtyMap = _generators
             .ToDictionary(pga => pga.GeneratorId, _ => false);
-    }
-
-    public enum RemoveProfileResult
-    {
-        OK,
-        NoMatchingProfile,
-        MultipleProfiles,
-        DataLoadError,
-        Failed,
     }
 
     public bool TryLoad(out ProfileDataExCollection profiles)
