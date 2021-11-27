@@ -18,9 +18,7 @@
     <None Include="_build\**">
       <Pack>True</Pack>
       <PackagePath>build\</PackagePath>
-    </None>
-    <None Remove="Program.cs.pp" />
-    <Content Include="Program.cs.pp" /> 
+    </None> 
     <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
