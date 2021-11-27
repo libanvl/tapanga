@@ -18,11 +18,4 @@
     <AssemblyAttribute Include="Tapanga.Plugin.PluginAssemblyAttribute" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Tapanga.Plugin\Tapanga.Plugin.csproj" >
-      <Private>false</Private>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </ProjectReference>
-  </ItemGroup>
-
 </Project>

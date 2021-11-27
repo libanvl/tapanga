@@ -1,26 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <RootNamespace>Tapanga</RootNamespace>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Authors>libanvl</Authors>
-    <Product>Tapanga</Product>
     <Description>Plugin API for the Tapanga terminal profile generator framework</Description>
-    <Copyright>The contributors and authors of the Tapanga project</Copyright>
-    <RepositoryUrl>https://github.com/libanvl/tapanga</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="libanvl.opt" Version="1.10.3-beta" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
