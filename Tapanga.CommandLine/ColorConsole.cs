@@ -35,13 +35,13 @@ internal class ColorConsole : ITerminal
     {
         BackgroundColor = bg;
         ForegroundColor = fg;
-        Out.Write($"{value}\n");
+        Out.Write($"{value}");
         ResetColor();
     }
 
     public void WriteLine<T>(T? value, ConsoleColor fg = default, ConsoleColor bg = default)
     {
-        Write($"{value}\n", fg, bg);
+        Write($"{value}{Environment.NewLine}", fg, bg);
     }
 
     public void WriteLine() => Write("\n");
