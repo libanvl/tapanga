@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using SourceGeneratorsKit;
 
@@ -22,6 +23,7 @@ namespace Tapanga.CommandLine.SourceGenerators
         /// <inheritdoc />
         public void Execute(GeneratorExecutionContext context)
         {
+            Debugger.Launch();
             if (this.interfacesReceiver.Classes.SingleOrDefault() is INamedTypeSymbol providerSymbol)
             {
                 string description = providerSymbol.ToDisplayString();
