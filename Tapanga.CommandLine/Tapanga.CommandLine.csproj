@@ -4,6 +4,7 @@
     <Description>Tapanga CommandLine Runner.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Configurations>Debug;Release;ReleaseLocal</Configurations>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
