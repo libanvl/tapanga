@@ -98,7 +98,7 @@ public class Runner
     {
         var rootCommand = new RootCommand(_rootDescription);
 
-        if (generators.Count() == 1 && generators.Single() is IProfileGeneratorAdapter pga)
+        if (generators.Count() == 1 && generators.FirstOrDefault() is IProfileGeneratorAdapter pga)
         {
             var profileDataCollection = newProfilesMap[pga.GeneratorId];
             var gca = new GeneratorCommandAdapter(
