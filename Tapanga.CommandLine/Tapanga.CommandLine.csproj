@@ -4,25 +4,17 @@
     <Description>Tapanga CommandLine Runner.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Configurations>Debug;Release;ReleaseLocal</Configurations>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0-1.final" PrivateAssets="all" />
-    <PackageReference Include="SourceGeneratorsKit" Version="0.0.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
     <PackageReference Include="System.CommandLine.Rendering" Version="0.3.0-alpha.21216.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tapanga.CommandLine.Analyzers\Tapanga.CommandLine.Analyzers.csproj" />
     <ProjectReference Include="..\Tapanga.Core\Tapanga.Core.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <!-- Package the generator in the analyzer directory of the nuget package -->
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <None Include="_build\**">
