@@ -20,21 +20,11 @@ public class Runner
     /// Initializes a new instance of <see cref="Runner"/>.
     /// </summary>
     /// <param name="rootDescription">A name for the tool. Displayed in menus and outputs.</param>
-    /// <param name="generatorFactories">Factories for the tool generators.</param>
-    public Runner(string rootDescription, IEnumerable<GeneratorFactoryAsync> generatorFactories)
+    /// <param name="generatorProvider">A generator provider.</param>
+    public Runner(string rootDescription, IGeneratorProvider generatorProvider)
     {
         _rootDescription = rootDescription;
-        _generatorFactories = generatorFactories;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="Runner"/>.
-    /// </summary>
-    /// <param name="rootDescription">A name for the tool. Displayed in menus and outputs.</param>
-    /// <param name="generatorFactories">Factories for the tool generators.</param>
-    public Runner(string rootDescription, params GeneratorFactoryAsync[] generatorFactories)
-        : this(rootDescription, generatorFactories.AsEnumerable())
-    {
+        _generatorFactories = generatorProvider.GetGeneratorFactories();
     }
 
     /// <summary>

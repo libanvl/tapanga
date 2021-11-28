@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tapanga.CommandLine.Analyzers\Tapanga.CommandLine.Analyzers.csproj" />
     <ProjectReference Include="..\Tapanga.Core\Tapanga.Core.csproj" />
   </ItemGroup>
 
