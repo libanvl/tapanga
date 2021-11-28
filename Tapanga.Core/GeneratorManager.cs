@@ -2,15 +2,15 @@
 
 namespace Tapanga.Core;
 
-public delegate Task<IProfileGenerator> GeneratorFactoryAsync();
-
 public class GeneratorManager
 {
     private readonly IEnumerable<GeneratorFactoryAsync> _generatorFactories;
+    private readonly GeneratorContext _context;
 
-    public GeneratorManager(IEnumerable<GeneratorFactoryAsync> generatorFactories)
+    public GeneratorManager(IEnumerable<GeneratorFactoryAsync> generatorFactories, GeneratorContext context)
     {
         _generatorFactories = generatorFactories;
+        _context = context;
     }
 
     public async Task<IEnumerable<IProfileGeneratorAdapter>> GetProfileGeneratorsAsync()
@@ -24,7 +24,7 @@ public class GeneratorManager
 
         foreach (var factory in _generatorFactories)
         {
-            result.Add(CreateGenerator(await factory()));
+            result.Add(CreateGenerator(await factory(_context)));
         }
 
         return result;

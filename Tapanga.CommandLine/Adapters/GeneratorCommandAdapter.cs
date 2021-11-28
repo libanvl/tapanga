@@ -13,19 +13,34 @@ internal class GeneratorCommandAdapter
     private readonly string _rootDescription;
     private readonly IProfileGeneratorAdapter _inner;
     private readonly ProfileDataCollection _profiles;
+    private readonly ProfileCommandAdapter _pga;
 
-    public GeneratorCommandAdapter(string rootDescription, IProfileGeneratorAdapter profileGenerator, ProfileDataCollection profiles)
+    public GeneratorCommandAdapter(
+        string rootDescription,
+        IProfileGeneratorAdapter profileGenerator,
+        ProfileDataCollection profiles,
+        ProfileCommandAdapter pga)
     {
         _rootDescription = rootDescription;
         _inner = profileGenerator;
         _profiles = profiles;
+        _pga = pga;
     }
 
-    public Command GetCommand() => new(_inner.GeneratorId.Key, _inner.Description)
+    public RootCommand GetRootCommand() => new(_rootDescription)
     {
         GetInfoCommand(),
         GetGoCommand(),
-        GetRunCommand()
+        GetRunCommand(),
+        _pga.GetCommand().WithAlias("pro"),
+    };
+
+    public Command GetCommands() => new(_inner.GeneratorId.Key, _inner.Description)
+    {
+        GetInfoCommand(),
+        GetGoCommand(),
+        GetRunCommand(),
+        _pga.GetCommand().WithAlias("pro"),
     };
 
     private Command GetInfoCommand() => new("info")

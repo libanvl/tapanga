@@ -28,6 +28,10 @@
     <Copyright>The contributors and authors of the Tapanga project</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)'=='ReleaseLocal' ">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
   <Choose>
     <When Condition=" '$(Configuration)'=='Debug' ">
       <PropertyGroup>
@@ -36,7 +40,7 @@
         <Optimize>false</Optimize>
       </PropertyGroup>
     </When>
-    <When Condition=" '$(Configuration)'=='Release' ">
+    <When Condition=" '$(Configuration)'=='Release' or '$(Configuration)'=='ReleaseLocal' ">
       <PropertyGroup>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -46,5 +50,9 @@
       </PropertyGroup>
     </When>
   </Choose>
+
+  <Target Name="PublishLocalFeed" AfterTargets="Pack" Condition=" '$(Configuration)'=='ReleaseLocal' ">
+    <Exec Command="dotnet nuget push $(ProjectDir)bin\$(Configuration)\$(PackageId).$(PackageVersion).nupkg -s &quot;$(NUGET_LOCAL_FEED)&quot;" />
+  </Target>
 
 </Project>

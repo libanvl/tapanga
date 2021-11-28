@@ -2,7 +2,9 @@
 using System.CommandLine.Builder;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
+using System.CommandLine.Rendering;
 using Tapanga.Core;
+using Tapanga.Plugin;
 
 namespace Tapanga.CommandLine;
 
@@ -12,7 +14,7 @@ namespace Tapanga.CommandLine;
 public class Runner
 {
     private readonly string _rootDescription;
-    private readonly GeneratorManager _generatorManager;
+    private readonly IEnumerable<GeneratorFactoryAsync> _generatorFactories;
 
     /// <summary>
     /// Initializes a new instance of <see cref="Runner"/>.
@@ -22,7 +24,7 @@ public class Runner
     public Runner(string rootDescription, IEnumerable<GeneratorFactoryAsync> generatorFactories)
     {
         _rootDescription = rootDescription;
-        _generatorManager = new GeneratorManager(generatorFactories);
+        _generatorFactories = generatorFactories;
     }
 
     /// <summary>
@@ -42,14 +44,18 @@ public class Runner
     /// <returns>An exit code.</returns>
     public async Task<int> InvokeAsync(string[] args)
     {
-        var console = new ColorConsole();
+        var console = new ColorConsole(new SystemConsoleTerminal(new SystemConsole()));
 
         try
         {
             ParseResult parseResult = new Parser().Parse(args);
+            bool dryrun = parseResult.Directives.Contains("dryrun");
 
-            var generators = await _generatorManager.GetProfileGeneratorsAsync();
+            var logger = new ColorConsoleLogger(console, GetLogLevel(parseResult.Directives));
+            var generatorContext = new GeneratorContext(logger, dryrun);
+            var generatorManager = new GeneratorManager(_generatorFactories, generatorContext);
 
+            var generators = await generatorManager.GetProfileGeneratorsAsync();
             var serializationManager = new SerializationManager(generators);
 
             var newProfilesMap = new ProfileDataCollectionMap();
@@ -67,9 +73,14 @@ public class Runner
 
             serializationManager.AddProfileData(newProfilesMap);
 
-            if (parseResult.Directives.Contains("dry-run"))
+            if (dryrun)
             {
-                new ProfileCommandAdapter(serializationManager).ListHandler(new SystemConsole());
+                if (serializationManager.TryLoad(out var profiles))
+                {
+                    var view = new ProfileDataExItemsView(profiles);
+                    console.Append(view);
+                }
+
                 console.MagentaLine("Running in Dry Run mode");
             }
             else
@@ -86,23 +97,62 @@ public class Runner
         }
         finally
         {
-            console.Reset();
+            console.ResetColor();
         }
     }
 
-    private CommandLineBuilder BuildCommandLine(IEnumerable<IProfileGeneratorAdapter> generators, SerializationManager pm, ProfileDataCollectionMap newProfilesMap)
+    private CommandLineBuilder BuildCommandLine(
+        IEnumerable<IProfileGeneratorAdapter> generators,
+        SerializationManager sm,
+        ProfileDataCollectionMap newProfilesMap)
     {
         var rootCommand = new RootCommand(_rootDescription);
 
-        foreach (var pg in generators)
+        if (generators.SingleOrDefault() is IProfileGeneratorAdapter pga)
         {
-            var innerCommands = new GeneratorCommandAdapter(_rootDescription, pg, newProfilesMap[pg.GeneratorId]);
-            rootCommand.Add(innerCommands.GetCommand());
+            var profileDataCollection = newProfilesMap[pga.GeneratorId];
+            var gca = new GeneratorCommandAdapter(
+                _rootDescription,
+                pga,
+                profileDataCollection,
+                new ProfileCommandAdapter(sm, pga.GeneratorId));
+
+            rootCommand = gca.GetRootCommand();
+        }
+        else
+        {
+            foreach (var pg in generators)
+            {
+                var innerCommands = new GeneratorCommandAdapter(
+                    _rootDescription,
+                    pg,
+                    newProfilesMap[pg.GeneratorId],
+                    new ProfileCommandAdapter(sm, pg.GeneratorId));
+
+                rootCommand.Add(innerCommands.GetCommands());
+            }
         }
 
-        var profileCommandAdapter = new ProfileCommandAdapter(pm);
-        rootCommand.Add(profileCommandAdapter.GetCommand().WithAlias("pro"));
-
         return new CommandLineBuilder(rootCommand);
+    }
+
+    private static LogLevel GetLogLevel(IDirectiveCollection directives)
+    {
+        if (directives.Contains("verbose"))
+        {
+            return LogLevel.Verbose;
+        }
+
+        if (directives.Contains("info"))
+        {
+            return LogLevel.Information;
+        }
+
+        if (directives.Contains("warning"))
+        {
+            return LogLevel.Warning;
+        }
+
+        return LogLevel.Error;
     }
 }

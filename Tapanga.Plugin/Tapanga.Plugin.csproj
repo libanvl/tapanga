@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>Tapanga</RootNamespace>
+    <RootNamespace>Tapanga.Plugin</RootNamespace>
     <Description>Plugin API for the Tapanga terminal profile generator framework</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Debug;Release;ReleaseLocal</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

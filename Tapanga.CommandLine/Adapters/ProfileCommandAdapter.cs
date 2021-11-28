@@ -9,10 +9,12 @@ namespace Tapanga.CommandLine;
 internal class ProfileCommandAdapter
 {
     private readonly SerializationManager _serializationManager;
+    private readonly GeneratorId _generatorId;
 
-    public ProfileCommandAdapter(SerializationManager serializationManager)
+    public ProfileCommandAdapter(SerializationManager serializationManager, GeneratorId generatorId)
     {
         _serializationManager = serializationManager;
+        _generatorId = generatorId;
     }
 
     public Command GetCommand() => new("profile", "Manage the generated profiles")
@@ -32,9 +34,10 @@ internal class ProfileCommandAdapter
     {
         if (_serializationManager.TryLoad(out var profiles))
         {
+            var filtered = profiles.Where(pde => pde.GeneratorId == _generatorId);
             var terminal = console.GetTerminal();
             var renderer = new ConsoleRenderer(terminal);
-            var view = new ProfileDataExItemsView(profiles);
+            var view = new ProfileDataExItemsView(filtered);
             terminal.Clear();
             view.Render(renderer, Region.Scrolling);
             console.Out.WriteLine();
@@ -75,19 +78,16 @@ internal class ProfileCommandAdapter
 
     private Command GetClearGeneratorCommand()
     {
-        Command command = new("clear-generator-profiles")
-        {
-            new Argument<string>("key", "the key of the generator profiles to be removed")
-        };
+        Command command = new("clear-generator-profiles");
 
         command.Handler = CommandHandler.Create(ClearGeneratorHandler);
 
         return command;
     }
 
-    private int ClearGeneratorHandler(ColorConsole console, string key)
+    private int ClearGeneratorHandler(ColorConsole console)
     {
-        var results = _serializationManager.RemoveGeneratorProfiles(key);
+        var results = _serializationManager.RemoveGeneratorProfiles(_generatorId.Key);
         if (results.All(r => r == RemoveProfileResult.OK))
         {
             console.GreenLine($"OK: {results.Count()} profiles removed");

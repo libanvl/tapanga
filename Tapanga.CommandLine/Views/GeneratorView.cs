@@ -61,6 +61,7 @@ internal class GeneratorView : StackLayoutView
         Add(oaTableView);
         Add(SpanNewLine);
         Add("*=Required  +=Accepts Multiple".White().AsView());
+        Add(SpanNewLine);
     }
 
     private TextSpan Span(object obj) => Formatter.Format(obj);

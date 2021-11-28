@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <Configurations>Debug;Release;ReleaseLocal</Configurations>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Resources\extensionReadme.txt" />
     <EmbeddedResource Include="Resources\extensionReadme.txt" />
