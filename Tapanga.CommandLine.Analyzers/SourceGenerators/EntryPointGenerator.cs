@@ -12,7 +12,7 @@ namespace Tapanga.CommandLine.SourceGenerators
     [Generator]
     public class EntryPointGenerator : ISourceGenerator
     {
-        private readonly ClassesWithInterfacesReceiver interfacesReceiver = new ClassesWithInterfacesReceiver("IGeneratorProvider");
+        private readonly ClassesWithInterfacesReceiver interfacesReceiver = new ClassesWithInterfacesReceiver("Tapanga.Plugin.IGeneratorProvider");
 
         /// <inheritdoc />
         public void Initialize(GeneratorInitializationContext context)
