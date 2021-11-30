@@ -1,6 +1,5 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.CommandLine.IO;
 using System.CommandLine.Rendering;
 using Tapanga.Core;
 
@@ -30,17 +29,15 @@ internal class ProfileCommandAdapter
         Description = "List all profiles created from the loaded plugins"
     };
 
-    public int ListHandler(SystemConsole console)
+    public int ListHandler(ColorConsole console)
     {
         if (_serializationManager.TryLoad(out var profiles))
         {
             var filtered = profiles.Where(pde => pde.GeneratorId == _generatorId);
-            var terminal = console.GetTerminal();
-            var renderer = new ConsoleRenderer(terminal);
             var view = new ProfileDataExItemsView(filtered);
-            terminal.Clear();
-            view.Render(renderer, Region.Scrolling);
-            console.Out.WriteLine();
+            console.Clear();
+            console.Append(view);
+            console.WriteLine();
             return 0;
         }
 
@@ -61,7 +58,7 @@ internal class ProfileCommandAdapter
 
     private int RemoveHandler(ColorConsole console, string id)
     {
-        var result = _serializationManager.RemoveProfile(id);
+        var result = _serializationManager.RemoveProfile(_generatorId, id);
         var msg = result switch
         {
             RemoveProfileResult.OK => $"OK: {id} removed",
@@ -78,11 +75,10 @@ internal class ProfileCommandAdapter
 
     private Command GetClearGeneratorCommand()
     {
-        Command command = new("clear-generator-profiles");
-
-        command.Handler = CommandHandler.Create(ClearGeneratorHandler);
-
-        return command;
+        return new("clear-generator-profiles")
+        {
+            Handler = CommandHandler.Create(ClearGeneratorHandler),
+        };
     }
 
     private int ClearGeneratorHandler(ColorConsole console)

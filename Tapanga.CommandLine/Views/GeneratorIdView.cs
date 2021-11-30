@@ -1,10 +1,9 @@
-﻿using System.CommandLine.Rendering;
-using System.CommandLine.Rendering.Views;
+﻿using System.CommandLine.Rendering.Views;
 using Tapanga.Core;
 
 namespace Tapanga.CommandLine;
 
-internal class GeneratorIdView : StackLayoutView
+internal class GeneratorIdView : BaseStackLayoutView
 {
     public GeneratorIdView(GeneratorId id)
         : base(Orientation.Horizontal)
@@ -13,11 +12,4 @@ internal class GeneratorIdView : StackLayoutView
         Add(Span(" ").AsView());
         Add($"{id.AssemblyName} {id.AssemblyVersion}".Cyan().AsView());
     }
-
-    private TextSpan Span(object obj)
-    {
-        return Formatter.Format(obj);
-    }
-
-    protected TextSpanFormatter Formatter { get; } = new TextSpanFormatter();
 }

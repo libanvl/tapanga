@@ -116,11 +116,12 @@ public class SerializationManager : ISerializationManager
         return false;
     }
 
-    public RemoveProfileResult RemoveProfile(string shortId)
+    public RemoveProfileResult RemoveProfile(GeneratorId generatorId, string shortId)
     {
         if (TryLoad(out var collection))
         {
             var matchingProfiles = collection
+                .Where(pdx => pdx.GeneratorId == generatorId)
                 .Where(pdx => pdx.ProfileId.ToString().StartsWith(shortId));
 
             if (!matchingProfiles.Any())

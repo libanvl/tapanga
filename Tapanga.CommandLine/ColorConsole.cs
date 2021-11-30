@@ -1,6 +1,5 @@
 ﻿using System.CommandLine.IO;
 using System.CommandLine.Rendering;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Tapanga.CommandLine;
 
@@ -45,6 +44,8 @@ internal class ColorConsole : ITerminal
     }
 
     public void WriteLine() => Write("\n");
+
+    public string? ReadLine() => Console.ReadLine();
 
     public void Blue<T>(T? value, ConsoleColor bg = default) =>
         Write(value, ConsoleColor.Blue, bg);
