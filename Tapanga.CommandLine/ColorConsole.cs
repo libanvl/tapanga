@@ -28,7 +28,7 @@ internal class ColorConsole : ITerminal
 
     public ColorConsole(IConsole console)
     {
-        _terminal = console.GetTerminal(outputMode: OutputMode.Ansi);
+        _terminal = console.GetTerminal();
     }
 
     public void Write<T>(T? value, ConsoleColor fg = default, ConsoleColor bg = default)
