@@ -28,7 +28,7 @@ internal class ColorConsole : ITerminal
 
     public ColorConsole(IConsole console)
     {
-        _terminal = console.GetTerminal();
+        _terminal = console.GetTerminal(outputMode: OutputMode.Ansi);
     }
 
     public void Write<T>(T? value, ConsoleColor fg = default, ConsoleColor bg = default)
@@ -112,4 +112,6 @@ internal class ColorConsole : ITerminal
     public void HideCursor() => _terminal.HideCursor();
 
     public void ShowCursor() => _terminal.ShowCursor();
+
+    public ITerminal GetTerminal() => _terminal;
 }

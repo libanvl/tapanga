@@ -51,10 +51,9 @@ internal class GeneratorCommandAdapter
 
     private void InfoHandler(ColorConsole console)
     {
-        var terminal = console.GetTerminal(preferVirtualTerminal: true);
-        terminal.Clear();
+        console.Clear();
         var view = new GeneratorView(_inner);
-        view.Render(new ConsoleRenderer(terminal, resetAfterRender: true), Region.EntireTerminal);
+        view.Render(new ConsoleRenderer(console, resetAfterRender: true), Region.Scrolling);
     }
 
     private Command GetRunCommand()
