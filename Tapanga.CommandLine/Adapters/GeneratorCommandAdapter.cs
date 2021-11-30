@@ -49,7 +49,7 @@ internal class GeneratorCommandAdapter
         Description = $"Get more information about the {_inner.GeneratorId.Key} generator",
     };
 
-    private void InfoHandler(SystemConsole console)
+    private void InfoHandler(ColorConsole console)
     {
         var terminal = console.GetTerminal(preferVirtualTerminal: true);
         terminal.Clear();
@@ -85,7 +85,7 @@ internal class GeneratorCommandAdapter
         };
     }
 
-    private int GoHandler(SystemConsole sys, ColorConsole console)
+    private int GoHandler(ColorConsole console)
     {
         var command = new RootCommand("__internal_go_handler__")
         {
@@ -94,12 +94,11 @@ internal class GeneratorCommandAdapter
         };
 
         var commandArgs = new List<string>();
-
         console.DarkBlue(_rootDescription, ConsoleColor.Gray);
         console.WriteLine();
         console.RedLine("Ctrl-C to cancel");
 
-        InfoHandler(sys);
+        InfoHandler(console);
         console.WriteLine();
         console.WriteLine();
 

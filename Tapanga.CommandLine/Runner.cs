@@ -34,7 +34,7 @@ public class Runner
     /// <returns>An exit code.</returns>
     public async Task<int> InvokeAsync(string[] args)
     {
-        var console = new ColorConsole(new SystemConsoleTerminal(new SystemConsole()));
+        var console = new ColorConsole(new SystemConsole());
 
         try
         {
@@ -52,7 +52,7 @@ public class Runner
 
             int ret = await BuildCommandLine(generators, serializationManager, newProfilesMap)
                 .UseDefaults()
-                .BuildServiceMiddleware(console)
+                .BuildServiceMiddleware()
                 .Build()
                 .InvokeAsync(args);
 

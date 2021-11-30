@@ -1,4 +1,5 @@
-﻿using System.CommandLine.IO;
+﻿using System.CommandLine;
+using System.CommandLine.IO;
 using System.CommandLine.Rendering;
 
 namespace Tapanga.CommandLine;
@@ -25,13 +26,14 @@ internal class ColorConsole : ITerminal
 
     public bool IsInputRedirected => _terminal.IsInputRedirected;
 
-    public ColorConsole(ITerminal terminal)
+    public ColorConsole(IConsole console)
     {
-        _terminal = terminal;
+        _terminal = console.GetTerminal();
     }
 
     public void Write<T>(T? value, ConsoleColor fg = default, ConsoleColor bg = default)
     {
+        _terminal.
         BackgroundColor = bg;
         ForegroundColor = fg;
         Out.Write($"{value}");
