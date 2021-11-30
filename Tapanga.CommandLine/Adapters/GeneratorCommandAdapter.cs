@@ -50,10 +50,9 @@ internal class GeneratorCommandAdapter
 
     private void InfoHandler(ColorConsole console)
     {
-        var terminal = console.GetTerminal();
-        terminal.Clear();
+        console.Clear();
         var view = new GeneratorView(_inner);
-        view.Render(new ConsoleRenderer(terminal, resetAfterRender: true), Region.Scrolling);
+        view.Render(new ConsoleRenderer(console, resetAfterRender: true), Region.EntireTerminal);
     }
 
     private Command GetRunCommand()
@@ -118,7 +117,7 @@ internal class GeneratorCommandAdapter
                 {
                     WriteOptPrompt(console, opt);
 
-                    response = console.ReadLine() ?? string.Empty;
+                    response = ColorConsole.ReadLine() ?? string.Empty;
 
                     if (opt.IsRequired
                         && !opt.HasDefaultValue

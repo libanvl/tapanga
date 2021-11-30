@@ -45,7 +45,7 @@ internal class ColorConsole : ITerminal
 
     public void WriteLine() => Write("\n");
 
-    public string? ReadLine() => Console.ReadLine();
+    public static string? ReadLine() => Console.ReadLine();
 
     public void Blue<T>(T? value, ConsoleColor bg = default) =>
         Write(value, ConsoleColor.Blue, bg);
@@ -101,28 +101,13 @@ internal class ColorConsole : ITerminal
     public void YellowLine<T>(T? value, ConsoleColor bg = default) =>
         WriteLine(value, ConsoleColor.Yellow, bg);
 
-    public void ResetColor()
-    {
-        _terminal.ResetColor();
-    }
+    public void ResetColor() => _terminal.ResetColor();
 
-    public void Clear()
-    {
-        _terminal.Clear();
-    }
+    public void Clear() => _terminal.Clear();
 
-    public void SetCursorPosition(int left, int top)
-    {
-        _terminal.SetCursorPosition(left, top);
-    }
+    public void SetCursorPosition(int left, int top) => _terminal.SetCursorPosition(left, top);
 
-    public void HideCursor()
-    {
-        _terminal.HideCursor();
-    }
+    public void HideCursor() => _terminal.HideCursor();
 
-    public void ShowCursor()
-    {
-        _terminal.ShowCursor();
-    }
+    public void ShowCursor() => _terminal.ShowCursor();
 }
