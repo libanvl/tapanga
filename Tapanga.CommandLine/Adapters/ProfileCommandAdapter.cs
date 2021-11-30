@@ -35,8 +35,10 @@ internal class ProfileCommandAdapter
         {
             var filtered = profiles.Where(pde => pde.GeneratorId == _generatorId);
             var view = new ProfileDataExItemsView(filtered);
-            console.Clear();
-            console.Append(view);
+            var terminal = console.GetTerminal();
+
+            terminal.Clear();
+            view.Render(new ConsoleRenderer(terminal), Region.Scrolling);
             console.WriteLine();
             return 0;
         }
