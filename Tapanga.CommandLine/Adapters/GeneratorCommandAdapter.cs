@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.CommandLine.Rendering;
 using Tapanga.Core;
@@ -48,11 +49,12 @@ internal class GeneratorCommandAdapter
         Description = $"Get more information about the {_inner.GeneratorId.Key} generator",
     };
 
-    private void InfoHandler(ColorConsole console)
+    private void InfoHandler(SystemConsole console)
     {
-        console.Clear();
+        var terminal = console.GetTerminal(preferVirtualTerminal: true);
+        terminal.Clear();
         var view = new GeneratorView(_inner);
-        view.Render(new ConsoleRenderer(console, resetAfterRender: true), Region.EntireTerminal);
+        view.Render(new ConsoleRenderer(terminal, resetAfterRender: true), Region.EntireTerminal);
     }
 
     private Command GetRunCommand()
@@ -83,7 +85,7 @@ internal class GeneratorCommandAdapter
         };
     }
 
-    private int GoHandler(ColorConsole console)
+    private int GoHandler(SystemConsole sys, ColorConsole console)
     {
         var command = new RootCommand("__internal_go_handler__")
         {
@@ -97,7 +99,7 @@ internal class GeneratorCommandAdapter
         console.WriteLine();
         console.RedLine("Ctrl-C to cancel");
 
-        InfoHandler(console);
+        InfoHandler(sys);
         console.WriteLine();
         console.WriteLine();
 
