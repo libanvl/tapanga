@@ -1,5 +1,4 @@
-﻿
-namespace Tapanga.Core;
+﻿namespace Tapanga.Core;
 
 public interface ISerializationManager
 {
@@ -7,7 +6,7 @@ public interface ISerializationManager
 
     IEnumerable<RemoveProfileResult> RemoveGeneratorProfiles(string generatorKey);
 
-    RemoveProfileResult RemoveProfile(string shortId);
+    RemoveProfileResult RemoveProfile(GeneratorId generatorId, string shortId);
 
     bool TryLoad(out ProfileDataExCollection profiles);
 

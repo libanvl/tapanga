@@ -50,9 +50,10 @@ internal class GeneratorCommandAdapter
 
     private void InfoHandler(ColorConsole console)
     {
-        console.Clear();
+        var terminal = console.GetTerminal();
+        terminal.Clear();
         var view = new GeneratorView(_inner);
-        console.Append(view);
+        view.Render(new ConsoleRenderer(terminal, resetAfterRender: true), Region.Scrolling);
     }
 
     private Command GetRunCommand()
@@ -158,21 +159,21 @@ internal class GeneratorCommandAdapter
 
         return result;
 
-        static void WriteOptPrompt(ColorConsole con, OptionAdapter opt)
+        static void WriteOptPrompt(ColorConsole console, OptionAdapter opt)
         {
-            con.Cyan(opt.LongName);
+            console.Cyan(opt.LongName);
 
             if (opt.HasDefaultValue)
             {
-                con.Blue($" [{opt.GetDefaultValuesString()}]");
+                console.Blue($" [{opt.GetDefaultValuesString()}]");
             }
 
             if (opt.IsRequired && !opt.HasDefaultValue)
             {
-                con.Yellow(" *REQUIRED*");
+                console.Yellow(" *REQUIRED*");
             }
 
-            con.Cyan(": ");
+            console.Cyan(": ");
         }
     }
 }
