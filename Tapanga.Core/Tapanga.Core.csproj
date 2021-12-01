@@ -1,17 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <Configurations>Debug;Release;ReleaseLocal</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\extensionReadme.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Resources\extensionReadme.txt" />
   </ItemGroup>
 

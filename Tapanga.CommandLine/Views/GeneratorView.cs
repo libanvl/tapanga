@@ -5,9 +5,10 @@ using Tapanga.Core;
 
 namespace Tapanga.CommandLine;
 
-internal class GeneratorView : StackLayoutView
+internal class GeneratorView : BaseStackLayoutView
 {
     public GeneratorView(IProfileGeneratorAdapter generator)
+        : base(Orientation.Vertical)
     {
         var oaTableView = new TableView<OptionAdapter>
         {
@@ -51,7 +52,7 @@ internal class GeneratorView : StackLayoutView
         Add(new GeneratorIdView(generator.GeneratorId));
         Add(SpanNewLine);
 
-        Add(generator.Description.ToString().Yellow().AsView());
+        Add(generator.Description.Yellow().AsView());
         Add(SpanNewLine);
 
         Add(generator.GeneratorInfo.ToString().White().AsView());
@@ -61,11 +62,8 @@ internal class GeneratorView : StackLayoutView
         Add(oaTableView);
         Add(SpanNewLine);
         Add("*=Required  +=Accepts Multiple".White().AsView());
+        Add(SpanNewLine);
     }
-
-    private TextSpan Span(object obj) => Formatter.Format(obj);
-
-    private View SpanNewLine => Span(Environment.NewLine).AsView();
 
     private TextSpan GetEnumValuesSpan(Type type)
     {
@@ -76,6 +74,4 @@ internal class GeneratorView : StackLayoutView
 
         return Span(string.Empty);
     }
-
-    protected TextSpanFormatter Formatter { get; } = new TextSpanFormatter();
 }

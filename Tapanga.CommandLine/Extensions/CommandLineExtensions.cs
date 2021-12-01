@@ -5,11 +5,11 @@ namespace Tapanga.CommandLine;
 
 internal static class CommandLineExtensions
 {
-    public static CommandLineBuilder BuildServiceMiddleware(this CommandLineBuilder builder, ColorConsole console)
+    public static CommandLineBuilder BuildServiceMiddleware(this CommandLineBuilder builder)
     {
         return builder.UseMiddleware(context =>
         {
-            context.BindingContext.AddService(_ => console);
+            context.BindingContext.AddService(_ => new ColorConsole(context.Console));
         });
     }
 

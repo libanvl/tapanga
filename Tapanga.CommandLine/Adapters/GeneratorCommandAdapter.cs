@@ -10,29 +10,46 @@ namespace Tapanga.CommandLine;
 
 internal class GeneratorCommandAdapter
 {
+    private readonly string _rootDescription;
     private readonly IProfileGeneratorAdapter _inner;
     private readonly ProfileDataCollection _profiles;
+    private readonly ProfileCommandAdapter _pga;
 
-    public GeneratorCommandAdapter(IProfileGeneratorAdapter profileGenerator, ProfileDataCollection profiles)
+    public GeneratorCommandAdapter(
+        string rootDescription,
+        IProfileGeneratorAdapter profileGenerator,
+        ProfileDataCollection profiles,
+        ProfileCommandAdapter pga)
     {
+        _rootDescription = rootDescription;
         _inner = profileGenerator;
         _profiles = profiles;
+        _pga = pga;
     }
 
-    public Command GetCommand() => new(_inner.GeneratorId.Key, _inner.Description)
+    public RootCommand GetRootCommand() => new(_rootDescription)
     {
         GetInfoCommand(),
         GetGoCommand(),
-        GetRunCommand()
+        GetRunCommand(),
+        _pga.GetCommand().WithAlias("pro"),
+    };
+
+    public Command GetCommands() => new(_inner.GeneratorId.Key, _inner.Description)
+    {
+        GetInfoCommand(),
+        GetGoCommand(),
+        GetRunCommand(),
+        _pga.GetCommand().WithAlias("pro"),
     };
 
     private Command GetInfoCommand() => new("info")
     {
         Handler = CommandHandler.Create(InfoHandler),
-        Description = $"Get extra information about the {_inner.GeneratorId.Key} generator",
+        Description = $"Get more information about the {_inner.GeneratorId.Key} generator",
     };
 
-    private void InfoHandler(SystemConsole console)
+    private void InfoHandler(ColorConsole console)
     {
         var terminal = console.GetTerminal();
         terminal.Clear();
@@ -68,7 +85,7 @@ internal class GeneratorCommandAdapter
         };
     }
 
-    private int GoHandler(SystemConsole systemConsole, ColorConsole con)
+    private int GoHandler(ColorConsole console)
     {
         var command = new RootCommand("__internal_go_handler__")
         {
@@ -77,32 +94,31 @@ internal class GeneratorCommandAdapter
         };
 
         var commandArgs = new List<string>();
+        console.DarkBlue(_rootDescription, ConsoleColor.Gray);
+        console.WriteLine();
+        console.RedLine("Ctrl-C to cancel");
 
-        con.DarkBlue(Program.RootDescription, ConsoleColor.Gray);
-        con.WriteLine();
-        con.RedLine("Ctrl-C to cancel");
-
-        InfoHandler(systemConsole);
-        systemConsole.Out.WriteLine();
-        systemConsole.Out.WriteLine();
+        InfoHandler(console);
+        console.WriteLine();
+        console.WriteLine();
 
         if (_inner is IProvideUserArguments argProvider)
         {
             foreach (var opt in argProvider.GetUserArguments().Select(arg => new OptionAdapter(arg)))
             {
-                con.GrayLine($"{opt.Description} ({opt.BoundType.Name})");
+                console.GrayLine($"{opt.Description} ({opt.BoundType.Name})");
 
                 if (opt.Arity.MaximumNumberOfValues > 1)
                 {
-                    con.MagentaLine($">> Seperate multiple inputs with space <<");
+                    console.MagentaLine($">> Seperate multiple inputs with space <<");
                 }
 
                 string response = string.Empty;
                 while (true)
                 {
-                    WriteOptPrompt(con, opt);
+                    WriteOptPrompt(console, opt);
 
-                    response = Console.ReadLine() ?? string.Empty;
+                    response = ColorConsole.ReadLine() ?? string.Empty;
 
                     if (opt.IsRequired
                         && !opt.HasDefaultValue
@@ -128,7 +144,7 @@ internal class GeneratorCommandAdapter
                     }
                 }
 
-                con.WriteLine();
+                console.WriteLine();
                 command.Add(opt);
             }
         }
@@ -137,27 +153,27 @@ internal class GeneratorCommandAdapter
 
         if (result == 0)
         {
-            con.CyanLine(">> Success!");
-            con.CyanLine(">> Restart Windows Terminal for changes to take effect.");
+            console.CyanLine(">> Success!");
+            console.CyanLine(">> Restart Windows Terminal for changes to take effect.");
         }
 
         return result;
 
-        static void WriteOptPrompt(ColorConsole con, OptionAdapter opt)
+        static void WriteOptPrompt(ColorConsole console, OptionAdapter opt)
         {
-            con.Cyan(opt.LongName);
+            console.Cyan(opt.LongName);
 
             if (opt.HasDefaultValue)
             {
-                con.Blue($" [{opt.GetDefaultValuesString()}]");
+                console.Blue($" [{opt.GetDefaultValuesString()}]");
             }
 
             if (opt.IsRequired && !opt.HasDefaultValue)
             {
-                con.Yellow(" *REQUIRED*");
+                console.Yellow(" *REQUIRED*");
             }
 
-            con.Cyan(": ");
+            console.Cyan(": ");
         }
     }
 }

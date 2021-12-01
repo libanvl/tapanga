@@ -1,164 +1,42 @@
-﻿using libanvl;
-using Microsoft;
-using System.Reflection;
-using System.Runtime.Loader;
-using Tapanga.Plugin;
+﻿using Tapanga.Plugin;
 
 namespace Tapanga.Core;
 
-using ProfileGenerators = List<IProfileGeneratorAdapter>;
-
 public class GeneratorManager
 {
-    private static Opt<ProfileGenerators> cachedGenerators = Opt.None<ProfileGenerators>();
-    private readonly Opt<IEnumerable<DirectoryInfo>> _pluginPaths;
+    private readonly IEnumerable<GeneratorFactoryAsync> _generatorFactories;
+    private readonly GeneratorContext _context;
 
-    public GeneratorManager(Opt<IEnumerable<DirectoryInfo>> pluginPaths)
+    public GeneratorManager(IEnumerable<GeneratorFactoryAsync> generatorFactories, GeneratorContext context)
     {
-        _pluginPaths = pluginPaths;
+        _generatorFactories = generatorFactories;
+        _context = context;
     }
 
-    public ProfileGenerators GetProfileGenerators()
+    public async Task<IEnumerable<IProfileGeneratorAdapter>> GetProfileGeneratorsAsync()
     {
-        if (cachedGenerators.IsNone)
+        if (!_generatorFactories.Any())
         {
-            IEnumerable<string> pluginsPaths = _pluginPaths
-                .SomeOrEmpty()
-                .Select(di => di.FullName);
-
-            var dllPaths = pluginsPaths.SelectMany(pp => Directory.EnumerateFiles(pp, "*.dll", new EnumerationOptions
-            {
-                MatchCasing = MatchCasing.CaseInsensitive,
-            }));
-
-            cachedGenerators = Opt.Some(
-                dllPaths
-                .SelectMany(dll => CreateGenerators(LoadPlugin(dll)))
-                .ToList());
+            throw new InvalidOperationException("No generators are registered with the Generator Manager.");
         }
 
-        if (cachedGenerators is Opt<ProfileGenerators>.Some someGenerators)
+        var result = new List<IProfileGeneratorAdapter>();
+
+        foreach (var factory in _generatorFactories)
         {
-            return someGenerators.Value;
+            result.Add(CreateGenerator(await factory(_context)));
         }
 
-        return Assumes.NotReachable<ProfileGenerators>();
+        return result;
     }
 
-    private static Opt<Assembly> LoadPlugin(string absolutePath)
+    private static IProfileGeneratorAdapter CreateGenerator(IProfileGenerator profileGenerator)
     {
-        try
+        return profileGenerator switch
         {
-            PluginLoadContext loadContext = new(absolutePath);
-            return loadContext.LoadFromAssemblyPath(absolutePath);
-        }
-        catch
-        {
-            return Opt<Assembly>.None;
-        }
-    }
-
-    private static IEnumerable<IProfileGeneratorAdapter> CreateGenerators(Opt<Assembly> optAssembly)
-    {
-        if (optAssembly.IsNone)
-        {
-            yield break;
-        }
-
-        Assembly assembly = optAssembly.Unwrap();
-
-        if (assembly.GetCustomAttribute<PluginAssemblyAttribute>() is null)
-        {
-            yield break;
-        }
-
-        int count = 0;
-
-        foreach (Type type in assembly.GetExportedTypes())
-        {
-            if (type.GetCustomAttribute<ProfileGeneratorAttribute>() is ProfileGeneratorAttribute pgattr)
-            {
-                if (!pgattr.IsEnabled)
-                {
-                    continue;
-                }
-
-                if (typeof(IDelegateProfileGenerator).IsAssignableFrom(type))
-                {
-
-                    var result = Activator.CreateInstance(type) as IDelegateProfileGenerator;
-                    if (result is IDelegateProfileGenerator generator)
-                    {
-                        count++;
-                        yield return new DelegateGeneratorAdapter(generator);
-                        continue;
-                    }
-                }
-
-                if (typeof(IProfileGenerator).IsAssignableFrom(type))
-                {
-                    var result = Activator.CreateInstance(type) as IProfileGenerator;
-                    if (result is IProfileGenerator generator)
-                    {
-                        count++;
-                        yield return new ProfileGeneratorAdapter(generator);
-                    }
-                }
-            }
-        }
-
-        if (count < 1)
-        {
-            throw new InvalidOperationException($"No generators found in Tapanga plugin assembly: {assembly.GetName().Name}");
-        }
-    }
-
-    private class PluginLoadContext : AssemblyLoadContext
-    {
-        private static readonly string[] sharedAssemblies = new[]
-        {
-            typeof(IProfileGenerator).Assembly.FullName!,
-            typeof(OptBase).Assembly.FullName!,
+            IDelegateProfileGenerator dpg => new DelegateGeneratorAdapter(dpg),
+            IProfileGenerator pg => new ProfileGeneratorAdapter(pg),
+            _ => throw new TypeLoadException("Generator factory returned an unexpected type."),
         };
-
-        private readonly AssemblyDependencyResolver _resolver;
-
-        public PluginLoadContext(string pluginPath) => _resolver = new AssemblyDependencyResolver(pluginPath);
-
-        protected override Assembly? Load(AssemblyName assemblyName)
-        {
-            // ensure the shared assemblies are not loaded in this context
-            if (sharedAssemblies.Contains(assemblyName.FullName))
-            {
-                return null;
-            }
-
-            try
-            {
-                string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
-                if (assemblyPath is not null)
-                {
-                    return LoadFromAssemblyPath(assemblyPath);
-
-                }
-            }
-            catch (BadImageFormatException)
-            {
-                return null;
-            }
-
-            return null;
-        }
-
-        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-        {
-            string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-            if (libraryPath is not null)
-            {
-                return LoadUnmanagedDllFromPath(libraryPath);
-            }
-
-            return IntPtr.Zero;
-        }
     }
 }

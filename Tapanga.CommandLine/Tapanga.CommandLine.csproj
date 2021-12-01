@@ -1,38 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>Tapanga.CommandLine</AssemblyName>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <PackAsTool>true</PackAsTool>
-    <ToolCommandName>tapanga</ToolCommandName>
-    <Authors>libanvl</Authors>
-    <Product>Tapanga</Product>
-    <Description>Tapanga command line tool.</Description>
-    <Copyright>The contributors and authors of the Tapanga project</Copyright>
-    <RepositoryUrl>https://github.com/libanvl/tapanga</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Description>Tapanga CommandLine Runner.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Debug;Release;ReleaseLocal</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
     <PackageReference Include="System.CommandLine.Rendering" Version="0.3.0-alpha.21216.1" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tapanga.Core.Generators\Tapanga.Core.Generators.csproj" />
     <ProjectReference Include="..\Tapanga.Core\Tapanga.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="_build\**">
+      <Pack>True</Pack>
+      <PackagePath>build\</PackagePath>
+    </None> 
     <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>

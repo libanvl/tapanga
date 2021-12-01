@@ -1,9 +1,22 @@
 ﻿namespace Tapanga.CommandLine;
 
-internal static class Errors
+/// <summary>
+/// Known command-line exit codes.
+/// </summary>
+public static class Errors
 {
-    public const int NoGenerators = -1;
-    public const int GeneratorNotFound = -2;
-    public const int GeneratorError = -3;
-    public const int UserCancelled = -4;
+    /// <summary>
+    /// An unknown error.
+    /// </summary>
+    public const int UnknownError = -100;
+
+    /// <summary>
+    /// An error during serialization operations.
+    /// </summary>
+    public const int SerializationError = -101;
+
+    /// <summary>
+    /// An error during a profile operation.
+    /// </summary>
+    public const int ProfileCommandError = -102;
 }

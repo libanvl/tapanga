@@ -9,9 +9,9 @@ public class ProfileDataExCollection : ICollection<ProfileDataEx>
 
     public static ProfileDataExCollection Empty { get; } = new ProfileDataExCollection();
 
-    public int Count => _inner.Count;
-
     public bool IsReadOnly => ((ICollection<ProfileDataEx>)_inner).IsReadOnly;
+
+    public int Count => ((ICollection<ProfileDataEx>)_inner).Count;
 
     public void Add(ProfileDataEx item) => _inner.Add(item);
 

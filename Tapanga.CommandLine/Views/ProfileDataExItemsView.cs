@@ -3,22 +3,23 @@ using Tapanga.Core;
 
 namespace Tapanga.CommandLine;
 
-internal class ProfileDataExItemsView : StackLayoutView
+internal class ProfileDataExItemsView : BaseStackLayoutView
 {
     public ProfileDataExItemsView(IEnumerable<ProfileDataEx> profiles)
+        : base(Orientation.Vertical)
     {
         var profileLookup = profiles.ToLookup(p => p.GeneratorId);
 
         foreach (var x in profileLookup)
         {
             Add(new GeneratorIdView(x.Key));
-            Add(new ContentView(Environment.NewLine));
+            Add(SpanNewLine);
             Add(new ProfileTableView()
             {
                 Items = x.ToList()
             });
-            Add(new ContentView(Environment.NewLine));
-            Add(new ContentView(Environment.NewLine));
+            Add(SpanNewLine);
+            Add(SpanNewLine);
         }
     }
 }

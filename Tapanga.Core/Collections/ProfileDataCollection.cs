@@ -5,7 +5,17 @@ namespace Tapanga.Core;
 
 public class ProfileDataCollection : IReadOnlyList<ProfileData>, IProfileDataCollection
 {
-    private readonly List<ProfileData> _inner = new();
+    private readonly IList<ProfileData> _inner;
+
+    protected ProfileDataCollection(IList<ProfileData> inner)
+    {
+        _inner = inner;
+    }
+
+    public ProfileDataCollection()
+        : this(new List<ProfileData>())
+    {
+    }
 
     public ProfileData this[int index] => ((IReadOnlyList<ProfileData>)_inner)[index];
 

@@ -7,32 +7,33 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.Core", "Tapanga.Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.Plugin", "Tapanga.Plugin\Tapanga.Plugin.csproj", "{BD132F80-A70C-41D2-9C6F-C91509BC63BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.Core.Generators", "Tapanga.Core.Generators\Tapanga.Core.Generators.csproj", "{0F60DE05-1882-4ECF-9CFA-BC8FE87E59BD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.CommandLine", "Tapanga.CommandLine\Tapanga.CommandLine.csproj", "{21EE6185-E535-476E-B537-DBB444002C36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		ReleaseLocal|Any CPU = ReleaseLocal|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D3057DDE-5158-40FC-85DF-C6C13CA59D79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D3057DDE-5158-40FC-85DF-C6C13CA59D79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3057DDE-5158-40FC-85DF-C6C13CA59D79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3057DDE-5158-40FC-85DF-C6C13CA59D79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3057DDE-5158-40FC-85DF-C6C13CA59D79}.ReleaseLocal|Any CPU.ActiveCfg = ReleaseLocal|Any CPU
+		{D3057DDE-5158-40FC-85DF-C6C13CA59D79}.ReleaseLocal|Any CPU.Build.0 = ReleaseLocal|Any CPU
 		{BD132F80-A70C-41D2-9C6F-C91509BC63BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD132F80-A70C-41D2-9C6F-C91509BC63BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD132F80-A70C-41D2-9C6F-C91509BC63BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD132F80-A70C-41D2-9C6F-C91509BC63BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F60DE05-1882-4ECF-9CFA-BC8FE87E59BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F60DE05-1882-4ECF-9CFA-BC8FE87E59BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F60DE05-1882-4ECF-9CFA-BC8FE87E59BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F60DE05-1882-4ECF-9CFA-BC8FE87E59BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD132F80-A70C-41D2-9C6F-C91509BC63BC}.ReleaseLocal|Any CPU.ActiveCfg = ReleaseLocal|Any CPU
+		{BD132F80-A70C-41D2-9C6F-C91509BC63BC}.ReleaseLocal|Any CPU.Build.0 = ReleaseLocal|Any CPU
 		{21EE6185-E535-476E-B537-DBB444002C36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{21EE6185-E535-476E-B537-DBB444002C36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21EE6185-E535-476E-B537-DBB444002C36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21EE6185-E535-476E-B537-DBB444002C36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21EE6185-E535-476E-B537-DBB444002C36}.ReleaseLocal|Any CPU.ActiveCfg = ReleaseLocal|Any CPU
+		{21EE6185-E535-476E-B537-DBB444002C36}.ReleaseLocal|Any CPU.Build.0 = ReleaseLocal|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
