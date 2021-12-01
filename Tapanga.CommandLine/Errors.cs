@@ -14,4 +14,9 @@ public static class Errors
     /// An error during serialization operations.
     /// </summary>
     public const int SerializationError = -101;
+
+    /// <summary>
+    /// An error during a profile operation.
+    /// </summary>
+    public const int ProfileCommandError = -102;
 }

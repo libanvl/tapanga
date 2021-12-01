@@ -43,7 +43,7 @@ internal class ProfileCommandAdapter
             return 0;
         }
 
-        return -1;
+        return Errors.ProfileCommandError;
     }
 
     private Command GetRemoveCommand()
@@ -93,6 +93,6 @@ internal class ProfileCommandAdapter
         }
 
         console.MagentaLine("Errors encountered.");
-        return -1;
+        return Errors.ProfileCommandError;
     }
 }
