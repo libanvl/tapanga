@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Tapanga.CommandLine\_build\Tapanga.CommandLine.props"/>
+  
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tapanga.CommandLine\Tapanga.CommandLine.csproj" />
+    <ProjectReference Include="..\Tapanga.Plugin\Tapanga.Plugin.csproj" />
+  </ItemGroup>
+
+</Project>

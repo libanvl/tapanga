@@ -42,8 +42,7 @@ public class Runner
             bool dryrun = parseResult.Directives.Contains("dryrun");
 
             var logger = new ColorConsoleLogger(console, GetLogLevel(parseResult.Directives));
-            var generatorContext = new GeneratorContext(logger, dryrun);
-            var generatorManager = new GeneratorManager(_generatorFactories, generatorContext);
+            var generatorManager = new GeneratorManager(_generatorFactories, logger, dryrun);
 
             var generators = await generatorManager.GetProfileGeneratorsAsync();
             var serializationManager = new SerializationManager(generators);

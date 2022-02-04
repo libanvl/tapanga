@@ -5,12 +5,14 @@ namespace Tapanga.Core;
 public class GeneratorManager
 {
     private readonly IEnumerable<GeneratorFactoryAsync> _generatorFactories;
-    private readonly GeneratorContext _context;
+    private readonly ILogger _logger;
+    private readonly bool _dryRun;
 
-    public GeneratorManager(IEnumerable<GeneratorFactoryAsync> generatorFactories, GeneratorContext context)
+    public GeneratorManager(IEnumerable<GeneratorFactoryAsync> generatorFactories, ILogger logger, bool dryRun)
     {
         _generatorFactories = generatorFactories;
-        _context = context;
+        _logger = logger;
+        _dryRun = dryRun;
     }
 
     public async Task<IEnumerable<IProfileGeneratorAdapter>> GetProfileGeneratorsAsync()
@@ -24,7 +26,7 @@ public class GeneratorManager
 
         foreach (var factory in _generatorFactories)
         {
-            result.Add(CreateGenerator(await factory(_context)));
+            result.Add(CreateGenerator(await factory(new GeneratorContext(_logger, ContextFileWriterImpl, ContextPathCombineImpl, _dryRun))));
         }
 
         return result;
@@ -38,5 +40,17 @@ public class GeneratorManager
             IProfileGenerator pg => new ProfileGeneratorAdapter(pg),
             _ => throw new TypeLoadException("Generator factory returned an unexpected type."),
         };
+    }
+
+    private static void ContextFileWriterImpl(IProfileGenerator generator, string relativePath, StringCollection content)
+    {
+        var readerWriter = GeneratorReaderWriter.Factory(generator.GetGeneratorId());
+        readerWriter.WriteContent(relativePath, content);
+    }
+
+    private static string ContextPathCombineImpl(IProfileGenerator generator, string relativePath)
+    {
+        var rootPath = generator.GetGeneratorId().GetPluginSerializationDirectoryPath(Constants.FragmentsRootPath);
+        return Path.Combine(rootPath, relativePath);
     }
 }

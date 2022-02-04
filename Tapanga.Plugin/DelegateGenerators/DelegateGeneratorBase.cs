@@ -8,7 +8,7 @@
 public abstract class DelegateGeneratorBase<T, U> : IDelegateProfileGenerator
 {
     /// <inheritdoc />
-    public abstract GeneratorInfo GeneratorInfo { get; }
+    public abstract StringCollection GeneratorInfo { get; }
 
     /// <inheritdoc />
     public abstract bool IsAsyncDelegate { get; }

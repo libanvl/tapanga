@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.Plugin", "Tapanga.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tapanga.CommandLine", "Tapanga.CommandLine\Tapanga.CommandLine.csproj", "{21EE6185-E535-476E-B537-DBB444002C36}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tapanga.Plugin.Sample", "Tapanga.Plugin.Sample\Tapanga.Plugin.Sample.csproj", "{6E32010E-78FC-40AE-BC28-C8B1EADDA00B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,12 @@ Global
 		{21EE6185-E535-476E-B537-DBB444002C36}.Release|Any CPU.Build.0 = Release|Any CPU
 		{21EE6185-E535-476E-B537-DBB444002C36}.ReleaseLocal|Any CPU.ActiveCfg = ReleaseLocal|Any CPU
 		{21EE6185-E535-476E-B537-DBB444002C36}.ReleaseLocal|Any CPU.Build.0 = ReleaseLocal|Any CPU
+		{6E32010E-78FC-40AE-BC28-C8B1EADDA00B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E32010E-78FC-40AE-BC28-C8B1EADDA00B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E32010E-78FC-40AE-BC28-C8B1EADDA00B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E32010E-78FC-40AE-BC28-C8B1EADDA00B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E32010E-78FC-40AE-BC28-C8B1EADDA00B}.ReleaseLocal|Any CPU.ActiveCfg = Release|Any CPU
+		{6E32010E-78FC-40AE-BC28-C8B1EADDA00B}.ReleaseLocal|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -19,7 +19,7 @@ internal class ProfileGeneratorAdapter : IProvideUserArguments, IProfileGenerato
         }
     }
 
-    public GeneratorInfo GeneratorInfo => _inner.GeneratorInfo;
+    public StringCollection GeneratorInfo => _inner.GeneratorInfo;
 
     public GeneratorId GeneratorId { get; }
 

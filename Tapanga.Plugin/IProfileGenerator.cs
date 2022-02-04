@@ -8,7 +8,7 @@ public interface IProfileGenerator
     /// <summary>
     /// Additional information about the profile generator.
     /// </summary>
-    public GeneratorInfo GeneratorInfo { get; }
+    public StringCollection GeneratorInfo { get; }
 
     /// <summary>
     /// Get the <see cref="Delegate"/> that does the work of the generator.

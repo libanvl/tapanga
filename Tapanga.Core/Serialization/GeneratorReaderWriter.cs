@@ -29,6 +29,14 @@ internal class GeneratorReaderWriter
             .WrapOpt();
     }
 
+    public void WriteContent(string name, StringCollection content)
+    {
+        string pluginPath = _genereratorId.GetPluginSerializationDirectoryPath(Constants.FragmentsRootPath);
+        Directory.CreateDirectory(pluginPath);
+
+        Overwrite(Path.Combine(pluginPath, name), content);
+    }
+
     public void Write(IEnumerable<ProfileDataEx> profiles)
     {
         Write(_genereratorId, GetFragmentRoot(GetFragmentProfiles(_genereratorId, profiles)));
@@ -49,14 +57,14 @@ internal class GeneratorReaderWriter
             }));
     }
 
-    private static void Overwrite(string filePath, string json)
+    private static void Overwrite(string filePath, string content)
     {
         if (File.Exists(filePath))
         {
             File.Delete(filePath);
         }
 
-        File.WriteAllText(filePath, json);
+        File.WriteAllText(filePath, content);
     }
 
     private static IEnumerable<Profile> GetFragmentProfiles(GeneratorId generatorId, IEnumerable<ProfileData> profiles)

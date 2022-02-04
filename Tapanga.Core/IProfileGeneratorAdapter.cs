@@ -8,7 +8,7 @@ public interface IProfileGeneratorAdapter
 
     GeneratorId GeneratorId { get; }
 
-    GeneratorInfo GeneratorInfo { get; }
+    StringCollection GeneratorInfo { get; }
 
     Delegate GetGeneratorDelegate(IProfileDataCollection profiles);
 
